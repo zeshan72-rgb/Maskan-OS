@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RentOS — Interactive Demo</title>
+<style>
+:root{
+  --bg:#fafafa; --surface:#fff; --border:#e5e5e5; --border-soft:#f0f0f0;
+  --text:#171717; --text-2:#525252; --text-3:#a3a3a3;
+  --accent:#171717; --success:#059669; --warn:#d97706; --danger:#dc2626; --info:#0284c7;
+  --radius:12px;
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,ui-sans-serif,system-ui,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;font-size:14px;line-height:1.5}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;font-size:inherit;cursor:pointer;border:none;background:none;color:inherit}
+
+/* ---------- motion ---------- */
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideDown{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes scaleIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
+@keyframes grow{from{width:0}}
+.anim-up{animation:slideUp .34s cubic-bezier(.22,1,.36,1) both}
+.anim-down{animation:slideDown .22s cubic-bezier(.22,1,.36,1) both}
+.anim-in{animation:fadeIn .3s ease-out both}
+.stagger>*{animation:slideUp .34s cubic-bezier(.22,1,.36,1) both}
+.stagger>*:nth-child(1){animation-delay:0ms}.stagger>*:nth-child(2){animation-delay:35ms}
+.stagger>*:nth-child(3){animation-delay:70ms}.stagger>*:nth-child(4){animation-delay:105ms}
+.stagger>*:nth-child(5){animation-delay:140ms}.stagger>*:nth-child(6){animation-delay:175ms}
+.stagger>*:nth-child(7){animation-delay:210ms}.stagger>*:nth-child(8){animation-delay:245ms}
+.stagger>*:nth-child(n+9){animation-delay:280ms}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* ---------- shell ---------- */
+.app{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:232px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column}
+.sidebar.dark{background:#171717;border-right-color:#262626}
+.brand{height:56px;display:flex;align-items:center;gap:9px;padding:0 16px;border-bottom:1px solid var(--border)}
+.sidebar.dark .brand{border-bottom-color:#262626}
+.logo{width:28px;height:28px;border-radius:7px;background:#171717;color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px;flex-shrink:0}
+.sidebar.dark .logo{background:#fff;color:#171717}
+.brand-name{font-weight:600;font-size:14px}
+.sidebar.dark .brand-name{color:#fff}
+.brand-sub{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#737373}
+.orgpick{margin:12px 12px 0;padding:8px 10px;border:1px solid var(--border);border-radius:9px;display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:500;cursor:pointer;transition:background .15s}
+.orgpick:hover{background:#fafafa}
+.nav{flex:1;overflow-y:auto;padding:14px 12px}
+.nav a{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:9px;font-size:13.5px;font-weight:500;color:var(--text-2);transition:background .15s,color .15s;margin-bottom:2px}
+.nav a:hover{background:#f5f5f5;color:var(--text)}
+.nav a.on{background:#f5f5f5;color:var(--text)}
+.sidebar.dark .nav a{color:#a3a3a3}
+.sidebar.dark .nav a:hover{background:#262626;color:#fff}
+.sidebar.dark .nav a.on{background:#262626;color:#fff}
+.nav svg{width:16px;height:16px;flex-shrink:0}
+.sidefoot{padding:12px;border-top:1px solid var(--border);font-size:12px;color:var(--text-3)}
+.sidebar.dark .sidefoot{border-top-color:#262626}
+
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{height:56px;flex-shrink:0;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;padding:0 24px}
+.search{display:flex;align-items:center;gap:8px;height:36px;flex:1;max-width:420px;border:1px solid var(--border);border-radius:9px;padding:0 12px;color:var(--text-3);font-size:13.5px;transition:border-color .15s}
+.search:hover{border-color:#d4d4d4}
+kbd{border:1px solid var(--border);background:#fafafa;border-radius:4px;padding:1px 5px;font-size:10px;font-family:var(--font);color:var(--text-3)}
+.avatar{width:32px;height:32px;border-radius:50%;background:#171717;color:#fff;display:grid;place-items:center;font-size:11px;font-weight:600}
+.content{flex:1;overflow-y:auto;padding:28px 32px 60px}
+.wrap{max-width:1320px;margin:0 auto}
+
+/* ---------- components ---------- */
+.crumbs{display:flex;gap:6px;font-size:12px;color:var(--text-3);margin-bottom:8px}
+.crumbs span:not(:last-child)::after{content:"›";margin-left:6px;color:#d4d4d4}
+h1{font-size:21px;font-weight:600;letter-spacing:-.01em}
+.sub{color:var(--text-2);font-size:13.5px;margin-top:3px}
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+.sechead{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);margin:26px 0 12px}
+.sechead:first-child{margin-top:0}
+
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}.g5{grid-template-columns:repeat(5,1fr)}
+@media(max-width:1100px){.g4,.g5{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:640px){.grid{grid-template-columns:1fr!important}}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px}
+.card-h{padding:18px 18px 10px}
+.card-t{font-size:13.5px;font-weight:600}
+.card-d{font-size:12.5px;color:var(--text-3);margin-top:2px}
+.card-b{padding:0 18px 18px}
+
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:15px;transition:transform .18s,box-shadow .18s}
+.stat:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.06)}
+.stat-l{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);display:flex;justify-content:space-between;align-items:center}
+.stat-v{font-size:23px;font-weight:600;letter-spacing:-.02em;margin-top:7px;font-variant-numeric:tabular-nums}
+.stat-s{font-size:11.5px;color:var(--text-3);margin-top:2px}
+.bar{height:4px;background:#f0f0f0;border-radius:99px;overflow:hidden;margin-top:11px}
+.bar>i{display:block;height:100%;border-radius:99px;animation:grow .9s cubic-bezier(.22,1,.36,1) both}
+
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+.tablewrap{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--surface)}
+thead{background:#fafafa}
+th{text-align:left;padding:9px 14px;font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);white-space:nowrap}
+td{padding:11px 14px;border-top:1px solid var(--border-soft);vertical-align:middle}
+tbody tr{transition:background .12s}
+tbody tr:hover{background:#fafafa}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.link{font-weight:500;cursor:pointer;transition:color .15s}
+.link:hover{color:var(--text-2);text-decoration:underline}
+.muted{color:var(--text-3)}
+.mini{font-size:11.5px;color:var(--text-3);margin-top:1px}
+
+.pill{display:inline-flex;align-items:center;gap:4px;border-radius:99px;padding:2px 9px;font-size:11.5px;font-weight:500;border:1px solid;white-space:nowrap}
+.p-neutral{background:#fafafa;border-color:var(--border);color:var(--text-2)}
+.p-success{background:#ecfdf5;border-color:#a7f3d0;color:#047857}
+.p-warn{background:#fffbeb;border-color:#fde68a;color:#b45309}
+.p-danger{background:#fef2f2;border-color:#fecaca;color:#b91c1c}
+.p-info{background:#f0f9ff;border-color:#bae6fd;color:#0369a1}
+.p-outline{background:#fff;border-color:#d4d4d4;color:var(--text-2)}
+
+.btn{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 15px;border-radius:9px;font-size:13.5px;font-weight:500;background:#171717;color:#fff;transition:background .15s,transform .1s}
+.btn:hover{background:#333}.btn:active{transform:scale(.98)}
+.btn.sm{height:31px;padding:0 11px;font-size:12.5px}
+.btn.out{background:#fff;color:var(--text);border:1px solid var(--border)}
+.btn.out:hover{background:#fafafa}
+.btn.ghost{background:transparent;color:var(--text-2)}
+.btn.ghost:hover{background:#f5f5f5;color:var(--text)}
+.btn svg{width:15px;height:15px}
+
+.alert{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 13px;border-radius:9px;font-size:13.5px;border:1px solid;transition:transform .18s,box-shadow .18s;cursor:pointer}
+.alert:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.05)}
+.a-danger{background:#fef2f2;border-color:#fecaca;color:#991b1b}
+.a-warn{background:#fffbeb;border-color:#fde68a;color:#92400e}
+
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:20px;overflow-x:auto}
+.tab{padding:9px 13px;font-size:13.5px;font-weight:500;color:var(--text-3);position:relative;white-space:nowrap;transition:color .15s}
+.tab:hover{color:var(--text)}
+.tab.on{color:var(--text)}
+.tab.on::after{content:"";position:absolute;left:8px;right:8px;bottom:-1px;height:2px;background:#171717;border-radius:2px}
+
+.dl{font-size:13.5px}
+.dl>div{display:flex;justify-content:space-between;gap:16px;padding:8px 0;border-top:1px solid var(--border-soft)}
+.dl>div:first-child{border-top:none}
+.dl dt{color:var(--text-3)}
+.dl dd{font-weight:500;font-variant-numeric:tabular-nums;text-align:right}
+
+.timeline{position:relative;padding-left:20px;border-left:1px solid var(--border)}
+.timeline li{list-style:none;margin-bottom:16px;position:relative}
+.timeline li::before{content:"";position:absolute;left:-25px;top:6px;width:9px;height:9px;border-radius:50%;background:#a3a3a3;border:2px solid #fff}
+.timeline .t-t{font-size:13.5px;font-weight:500;text-transform:capitalize}
+.timeline .t-d{font-size:11.5px;color:var(--text-3)}
+
+.empty{border:1px dashed #d4d4d4;background:#fafafa;border-radius:var(--radius);padding:52px 20px;text-align:center}
+.empty .ic{width:44px;height:44px;border-radius:50%;background:#fff;border:1px solid var(--border);display:grid;place-items:center;margin:0 auto 12px;color:var(--text-3)}
+
+.toolbar{display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+.inp{height:36px;border:1px solid var(--border);border-radius:9px;padding:0 12px;font-size:13.5px;font-family:inherit;background:#fff;color:var(--text)}
+.inp::placeholder{color:var(--text-3)}
+select.inp{cursor:pointer}
+
+/* portal shell */
+.portal{min-height:100vh;background:var(--bg);display:flex;flex-direction:column}
+.pbar{height:56px;background:rgba(255,255,255,.95);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20}
+.pbar-in{max-width:920px;margin:0 auto;height:100%;display:flex;align-items:center;gap:12px;padding:0 18px}
+.pnav{display:flex;gap:2px;margin-left:auto}
+.pnav a{padding:6px 11px;border-radius:9px;font-size:13.5px;font-weight:500;color:var(--text-2);transition:background .15s}
+.pnav a.on{background:#f5f5f5;color:var(--text)}
+.pmain{max-width:920px;margin:0 auto;width:100%;padding:22px 18px 40px}
+@media(max-width:640px){.pnav{display:none}.pmain{padding-bottom:86px}}
+.pbottom{display:none}
+@media(max-width:640px){
+  .pbottom{display:flex;position:fixed;inset:auto 0 0 0;background:rgba(255,255,255,.97);border-top:1px solid var(--border);z-index:30}
+  .pbottom a{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 0;font-size:10px;font-weight:500;color:var(--text-3)}
+  .pbottom a.on{color:var(--text)}
+  .pbottom svg{width:19px;height:19px}
+  .sidebar{display:none}
+  .content{padding:20px 16px 40px}
+  .topbar{padding:0 16px}
+}
+
+.switcher{position:fixed;right:18px;bottom:18px;z-index:60;background:#171717;color:#fff;border-radius:12px;padding:9px;box-shadow:0 10px 30px rgba(0,0,0,.22);display:flex;gap:5px;flex-wrap:wrap;max-width:min(560px,92vw)}
+.switcher b{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#a3a3a3;width:100%;padding:2px 6px 4px}
+.switcher a{padding:5px 10px;border-radius:8px;font-size:12px;font-weight:500;color:#d4d4d4;transition:background .15s}
+.switcher a:hover{background:#333;color:#fff}
+.switcher a.on{background:#fff;color:#171717}
+
+.banner{background:#171717;color:#fff;padding:7px 16px;font-size:12.5px;text-align:center}
+.banner b{font-weight:600}
+</style>
+</head>
+<body>
+<div class="banner">Interactive demo — all data below is fictional sample data for <b>Pearl Property Management</b>, Doha. No database required.</div>
+<div id="root"></div>
+<div class="switcher" id="switcher"></div>
+
+<script>
+/* =====================================================================
+   Demo data — mirrors the seeded Supabase portfolio
+   ===================================================================== */
+const QAR = n => n==null ? "—" : "QAR " + Number(n).toLocaleString("en-QA",{minimumFractionDigits:0,maximumFractionDigits:0});
+const QAR2 = n => n==null ? "—" : "QAR " + Number(n).toLocaleString("en-QA",{minimumFractionDigits:2,maximumFractionDigits:2});
+const D = s => new Date(s).toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"});
+const DT = s => new Date(s).toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"})+", "+new Date(s).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
+
+const PROPS = [
+  {id:"p1",name:"The Pearl Residences",code:"PROP-001",type:"Residential",addr:"Porto Arabia, The Pearl, Doha",units:16,occ:12,owner:"Jassim Al-Thani",rent:118500},
+  {id:"p2",name:"West Bay Towers",code:"PROP-002",type:"Residential",addr:"West Bay, Doha",units:14,occ:9,owner:"Doha Horizon Holdings",rent:87000},
+  {id:"p3",name:"Al Sadd Business Center",code:"PROP-003",type:"Commercial",addr:"Al Sadd Street, Doha",units:8,occ:6,owner:"Noora Al-Emadi",rent:66000},
+  {id:"p4",name:"Lusail Marina View",code:"PROP-004",type:"Residential",addr:"Marina District, Lusail",units:10,occ:5,owner:"Khalid Al-Marri",rent:48500},
+  {id:"p5",name:"Al Waab Villa Compound",code:"PROP-005",type:"Villa Compound",addr:"Al Waab, Doha",units:6,occ:3,owner:"Lusail Capital Real Estate",rent:41000},
+];
+
+const UNITS = [
+  {id:"u1",p:"p1",no:"101",floor:"1",beds:2,baths:2,area:130,type:"2br",furn:"Furnished",market:9500,rent:9500,status:"Occupied",tenant:"John Smith",lease:"l1"},
+  {id:"u2",p:"p1",no:"102",floor:"1",beds:1,baths:1,area:95,type:"1br",furn:"Semi-furnished",market:7000,rent:7000,status:"Occupied",tenant:"Priya Sharma",lease:"l2"},
+  {id:"u3",p:"p1",no:"103",floor:"1",beds:3,baths:3,area:165,type:"3br",furn:"Furnished",market:12500,rent:12500,status:"Occupied",tenant:"Ahmed Hassan",lease:"l3"},
+  {id:"u4",p:"p1",no:"104",floor:"1",beds:2,baths:2,area:130,type:"2br",furn:"Unfurnished",market:9000,rent:null,status:"Vacant",tenant:null,lease:null},
+  {id:"u5",p:"p1",no:"201",floor:"2",beds:2,baths:2,area:130,type:"2br",furn:"Furnished",market:9500,rent:9500,status:"Occupied",tenant:"Li Wei",lease:"l4"},
+  {id:"u6",p:"p1",no:"202",floor:"2",beds:1,baths:1,area:95,type:"1br",furn:"Furnished",market:7500,rent:null,status:"Maintenance",tenant:null,lease:null},
+  {id:"u7",p:"p1",no:"203",floor:"2",beds:3,baths:3,area:165,type:"3br",furn:"Semi-furnished",market:12000,rent:12000,status:"Occupied",tenant:"Fatima Noor",lease:"l5"},
+  {id:"u8",p:"p1",no:"204",floor:"2",beds:0,baths:1,area:60,type:"studio",furn:"Furnished",market:5500,rent:null,status:"Vacant",tenant:null,lease:null},
+];
+
+const LEASES = [
+  {id:"l1",code:"LEASE-0001",tenant:"John Smith",prop:"The Pearl Residences",unit:"101",start:"2026-02-01",end:"2027-01-31",rent:9500,freq:"Monthly",method:"Bank transfer",status:"Active",outstanding:9500,deposit:9500},
+  {id:"l2",code:"LEASE-0002",tenant:"Priya Sharma",prop:"The Pearl Residences",unit:"102",start:"2025-11-15",end:"2026-11-14",rent:7000,freq:"Quarterly",method:"Post-dated cheque",status:"Expiring",outstanding:0,deposit:7000},
+  {id:"l3",code:"LEASE-0003",tenant:"Ahmed Hassan",prop:"The Pearl Residences",unit:"103",start:"2025-09-01",end:"2026-08-31",rent:12500,freq:"Monthly",method:"Post-dated cheque",status:"Renewal Offered",outstanding:5000,deposit:12500},
+  {id:"l4",code:"LEASE-0004",tenant:"Li Wei",prop:"The Pearl Residences",unit:"201",start:"2026-01-01",end:"2026-12-31",rent:9500,freq:"Monthly",method:"Bank transfer",status:"Active",outstanding:0,deposit:9500},
+  {id:"l5",code:"LEASE-0005",tenant:"Fatima Noor",prop:"The Pearl Residences",unit:"203",start:"2025-12-01",end:"2026-11-30",rent:12000,freq:"Monthly",method:"Cash",status:"Active",outstanding:24000,deposit:12000},
+  {id:"l6",code:"LEASE-0006",tenant:"Carlos Silva",prop:"West Bay Towers",unit:"301",start:"2026-03-01",end:"2027-02-28",rent:8500,freq:"Monthly",method:"Bank transfer",status:"Active",outstanding:0,deposit:8500},
+  {id:"l7",code:"LEASE-0007",tenant:"Elena Petrova",prop:"West Bay Towers",unit:"302",start:"2025-10-01",end:"2026-09-30",rent:9000,freq:"Semi-annual",method:"Post-dated cheque",status:"Active",outstanding:9000,deposit:9000},
+  {id:"l8",code:"LEASE-0008",tenant:"Youssef Amin",prop:"Al Sadd Business Center",unit:"Office 4",start:"2025-07-01",end:"2026-06-30",rent:11000,freq:"Quarterly",method:"Bank transfer",status:"Expiring",outstanding:33000,deposit:22000},
+  {id:"l9",code:"LEASE-0009",tenant:"Grace Kim",prop:"Lusail Marina View",unit:"502",start:"2026-04-01",end:"2027-03-31",rent:9500,freq:"Monthly",method:"Bank transfer",status:"Active",outstanding:0,deposit:9500},
+  {id:"l10",code:"LEASE-0010",tenant:"David Cohen",prop:"Al Waab Villa Compound",unit:"Villa 2",start:"2025-08-15",end:"2026-08-14",rent:16000,freq:"Monthly",method:"Post-dated cheque",status:"Active",outstanding:16000,deposit:32000},
+];
+
+const SCHEDULE = [
+  {n:1,due:"2026-02-01",amt:9500,out:0,status:"Paid",alloc:[{amt:9500,ref:"TRF-1-1"}]},
+  {n:2,due:"2026-03-01",amt:9500,out:0,status:"Paid",alloc:[{amt:9500,ref:"TRF-1-2"}]},
+  {n:3,due:"2026-04-01",amt:9500,out:0,status:"Paid",alloc:[{amt:9500,ref:"TRF-1-3"}]},
+  {n:4,due:"2026-05-01",amt:9500,out:0,status:"Paid",alloc:[{amt:5700,ref:"CASH-1-4"},{amt:3800,ref:"TRF-1-4b"}]},
+  {n:5,due:"2026-06-01",amt:9500,out:0,status:"Paid",alloc:[{amt:9500,ref:"CHQ-448120"}]},
+  {n:6,due:"2026-07-01",amt:9500,out:3800,status:"Partial",alloc:[{amt:5700,ref:"CASH-1-6"}]},
+  {n:7,due:"2026-08-01",amt:9500,out:9500,status:"Overdue",alloc:[]},
+  {n:8,due:"2026-09-01",amt:9500,out:9500,status:"Upcoming",alloc:[]},
+  {n:9,due:"2026-10-01",amt:9500,out:9500,status:"Upcoming",alloc:[]},
+  {n:10,due:"2026-11-01",amt:9500,out:9500,status:"Upcoming",alloc:[]},
+  {n:11,due:"2026-12-01",amt:9500,out:9500,status:"Upcoming",alloc:[]},
+  {n:12,due:"2027-01-01",amt:9500,out:9500,status:"Upcoming",alloc:[]},
+];
+
+const PAYMENTS = [
+  {id:"pay1",date:"2026-08-16",tenant:"John Smith",lease:"LEASE-0001",method:"Bank transfer",ref:"TRF-PENDING-001",amt:9500,alloc:0,status:"Pending Verification",receipt:null},
+  {id:"pay2",date:"2026-08-14",tenant:"Li Wei",lease:"LEASE-0004",method:"Bank transfer",ref:"QNB-88231",amt:9500,alloc:9500,status:"Confirmed",receipt:"RCP-2026-00051"},
+  {id:"pay3",date:"2026-08-12",tenant:"Ahmed Hassan",lease:"LEASE-0003",method:"Post-dated cheque",ref:"CHQ-448120",amt:12500,alloc:12500,status:"Confirmed",receipt:"RCP-2026-00050"},
+  {id:"pay4",date:"2026-08-09",tenant:"Fatima Noor",lease:"LEASE-0005",method:"Cash",ref:"CASH-1-6",amt:5700,alloc:5700,status:"Confirmed",receipt:"RCP-2026-00049"},
+  {id:"pay5",date:"2026-08-05",tenant:"Carlos Silva",lease:"LEASE-0006",method:"Bank transfer",ref:"QIB-77412",amt:8500,alloc:8500,status:"Confirmed",receipt:"RCP-2026-00048"},
+  {id:"pay6",date:"2026-08-02",tenant:"Grace Kim",lease:"LEASE-0009",method:"Bank transfer",ref:"CBQ-11209",amt:9500,alloc:9500,status:"Confirmed",receipt:"RCP-2026-00047"},
+  {id:"pay7",date:"2026-07-29",tenant:"Elena Petrova",lease:"LEASE-0007",method:"Bank transfer",ref:"—",amt:4500,alloc:0,status:"Rejected",receipt:null,reason:"No matching transfer on the bank statement for this date."},
+];
+
+const CHEQUES = [
+  {id:"c1",no:"CHQ448120",bank:"Qatar Islamic Bank",payer:"Ahmed Hassan",lease:"LEASE-0003",amt:12500,date:"2026-08-12",received:"2026-06-20",status:"Cleared",due:false},
+  {id:"c2",no:"CHQ551204",bank:"Qatar National Bank",payer:"Priya Sharma",lease:"LEASE-0002",amt:21000,date:"2026-08-25",received:"2026-06-20",status:"Received",due:true},
+  {id:"c3",no:"CHQ662310",bank:"Commercial Bank",payer:"David Cohen",lease:"LEASE-0010",amt:16000,date:"2026-08-28",received:"2026-07-01",status:"Submitted",due:true},
+  {id:"c4",no:"CHQ773455",bank:"Doha Bank",payer:"Elena Petrova",lease:"LEASE-0007",amt:54000,date:"2026-08-04",received:"2026-06-15",status:"Bounced",due:false},
+  {id:"c5",no:"CHQ884521",bank:"Qatar Islamic Bank",payer:"Ahmed Hassan",lease:"LEASE-0003",amt:12500,date:"2026-09-12",received:"2026-06-20",status:"Stored",due:true},
+  {id:"c6",no:"CHQ990017",bank:"Qatar National Bank",payer:"Youssef Amin",lease:"LEASE-0008",amt:33000,date:"2026-09-30",received:"2026-07-10",status:"Received",due:false},
+];
+
+const CHEQUE_TIMELINE = [
+  {to:"Received",from:null,at:"2026-06-15T09:12:00",note:"Six post-dated cheques received at handover."},
+  {to:"Stored",from:"Received",at:"2026-06-15T09:40:00",note:"Filed in the safe, drawer B."},
+  {to:"Submitted",from:"Stored",at:"2026-08-03T08:05:00",note:"Deposited at Doha Bank, West Bay branch."},
+  {to:"Bounced",from:"Submitted",at:"2026-08-04T14:22:00",note:"Returned by the bank — insufficient funds. Tenant notified."},
+];
+
+const MAINT = [
+  {id:"m1",code:"MR-0001",desc:"AC unit in the living room is running but blowing warm air.",prop:"The Pearl Residences",unit:"101",tenant:"John Smith",cat:"HVAC / AC",pri:"High",status:"Assigned",age:3,vendor:"Rashid Cooling Services"},
+  {id:"m2",code:"MR-0002",desc:"Kitchen sink is leaking under the cabinet.",prop:"West Bay Towers",unit:"301",tenant:"Carlos Silva",cat:"Plumbing",pri:"Normal",status:"In Progress",age:5,vendor:"Al Reem Plumbing"},
+  {id:"m3",code:"MR-0003",desc:"Bedroom power socket has stopped working.",prop:"The Pearl Residences",unit:"203",tenant:"Fatima Noor",cat:"Electrical",pri:"Emergency",status:"Submitted",age:1,vendor:null},
+  {id:"m4",code:"MR-0004",desc:"Washing machine will not start its cycle.",prop:"Lusail Marina View",unit:"502",tenant:"Grace Kim",cat:"Appliances",pri:"Low",status:"Completed",age:12,vendor:"Doha Electrical Works"},
+  {id:"m5",code:"MR-0005",desc:"Bathroom extractor fan is very noisy.",prop:"Al Waab Villa Compound",unit:"Villa 2",tenant:"David Cohen",cat:"HVAC / AC",pri:"Low",status:"Scheduled",age:2,vendor:"Rashid Cooling Services"},
+  {id:"m6",code:"MR-0006",desc:"Front door lock is stiff and hard to turn.",prop:"Al Sadd Business Center",unit:"Office 4",tenant:"Youssef Amin",cat:"Locks & Security",pri:"Normal",status:"Waiting",age:9,vendor:null},
+];
+
+const EXPENSES = [
+  {id:"e1",date:"2026-08-10",desc:"Common area electricity — August",prop:"The Pearl Residences",owner:"Jassim Al-Thani",cat:"Utilities",vendor:"—",amt:1850,status:"approved"},
+  {id:"e2",date:"2026-08-08",desc:"AC compressor replacement — Unit 101",prop:"The Pearl Residences",owner:"Jassim Al-Thani",cat:"Maintenance & Repairs",vendor:"Rashid Cooling Services",amt:2400,status:"approved"},
+  {id:"e3",date:"2026-08-06",desc:"Monthly common area cleaning",prop:"West Bay Towers",owner:"Doha Horizon Holdings",cat:"Cleaning",vendor:"—",amt:800,status:"pending"},
+  {id:"e4",date:"2026-08-01",desc:"Management fee — August",prop:"The Pearl Residences",owner:"Jassim Al-Thani",cat:"Management Fee",vendor:"—",amt:9480,status:"approved"},
+  {id:"e5",date:"2026-07-28",desc:"Lift maintenance contract",prop:"West Bay Towers",owner:"Doha Horizon Holdings",cat:"Maintenance & Repairs",vendor:"—",amt:3200,status:"approved"},
+  {id:"e6",date:"2026-07-25",desc:"Security guard — monthly",prop:"Al Sadd Business Center",owner:"Noora Al-Emadi",cat:"Security",vendor:"—",amt:4500,status:"approved"},
+  {id:"e7",date:"2026-07-20",desc:"Pest control treatment",prop:"Al Waab Villa Compound",owner:"Lusail Capital",cat:"Other",vendor:"—",amt:650,status:"rejected"},
+];
+
+const OWNERS = [
+  {id:"o1",name:"Jassim Al-Thani",kind:"Individual",id_no:"28511012345",email:"jassim.althani@example.qa",phone:"+974 5511 2233",props:1,units:16},
+  {id:"o2",name:"Doha Horizon Holdings",kind:"Company",id_no:"CR-88213",email:"finance@dohahorizon.qa",phone:"+974 4433 2211",props:1,units:14},
+  {id:"o3",name:"Noora Al-Emadi",kind:"Individual",id_no:"29011045678",email:"noora.emadi@example.qa",phone:"+974 5522 3344",props:1,units:8},
+  {id:"o4",name:"Khalid Al-Marri",kind:"Individual",id_no:"28711078901",email:"khalid.almarri@example.qa",phone:"+974 5533 4455",props:1,units:10},
+  {id:"o5",name:"Lusail Capital Real Estate",kind:"Company",id_no:"CR-91045",email:"ar@lusailcapital.qa",phone:"+974 4400 7788",props:1,units:6},
+];
+
+const TENANTS = [
+  {id:"t1",name:"John Smith",qid:"28711098765",nat:"British",email:"john.smith@example.com",phone:"+974 5533 1122",unit:"The Pearl Residences · 101",status:"Active"},
+  {id:"t2",name:"Priya Sharma",qid:"29011234567",nat:"Indian",email:"priya.s@example.com",phone:"+974 5544 2233",unit:"The Pearl Residences · 102",status:"Expiring"},
+  {id:"t3",name:"Ahmed Hassan",qid:"28611445566",nat:"Egyptian",email:"a.hassan@example.com",phone:"+974 5566 3344",unit:"The Pearl Residences · 103",status:"Renewal Offered"},
+  {id:"t4",name:"Li Wei",qid:"29111778899",nat:"Chinese",email:"li.wei@example.com",phone:"+974 5577 4455",unit:"The Pearl Residences · 201",status:"Active"},
+  {id:"t5",name:"Fatima Noor",qid:"28911002233",nat:"Pakistani",email:"f.noor@example.com",phone:"+974 5588 5566",unit:"The Pearl Residences · 203",status:"Active"},
+  {id:"t6",name:"Carlos Silva",qid:"29211334455",nat:"Brazilian",email:"c.silva@example.com",phone:"+974 5599 6677",unit:"West Bay Towers · 301",status:"Active"},
+  {id:"t7",name:"Elena Petrova",qid:"28811667788",nat:"Russian",email:"e.petrova@example.com",phone:"+974 5510 7788",unit:"West Bay Towers · 302",status:"Active"},
+  {id:"t8",name:"Youssef Amin",qid:"28511889900",nat:"Jordanian",email:"y.amin@example.com",phone:"+974 5521 8899",unit:"Al Sadd Business Center · Office 4",status:"Expiring"},
+];
+
+const STATEMENTS = [
+  {id:"s1",owner:"Jassim Al-Thani",from:"2026-07-01",to:"2026-07-31",open:4200,rent:118500,other:0,exp:4050,maint:2400,fee:9480,adj:0,payout:102570,close:106770,status:"Finalised",v:1},
+  {id:"s2",owner:"Doha Horizon Holdings",from:"2026-07-01",to:"2026-07-31",open:0,rent:87000,other:0,exp:4000,maint:0,fee:6960,adj:-500,payout:75540,close:75540,status:"Finalised",v:1},
+  {id:"s3",owner:"Noora Al-Emadi",from:"2026-07-01",to:"2026-07-31",open:1200,rent:66000,other:0,exp:4500,maint:0,fee:5280,adj:0,payout:56220,close:57420,status:"Finalised",v:2},
+  {id:"s4",owner:"Jassim Al-Thani",from:"2026-08-01",to:"2026-08-31",open:106770,rent:96200,other:0,exp:1850,maint:2400,fee:9480,adj:0,payout:82470,close:189240,status:"Draft",v:1},
+];
+
+const ARREARS = [
+  {tenant:"Youssef Amin",prop:"Al Sadd Business Center",unit:"Office 4",amt:33000,oldest:"2026-04-01",bucket:"90+"},
+  {tenant:"Fatima Noor",prop:"The Pearl Residences",unit:"203",amt:24000,oldest:"2026-06-01",bucket:"61-90"},
+  {tenant:"David Cohen",prop:"Al Waab Villa Compound",unit:"Villa 2",amt:16000,oldest:"2026-07-15",bucket:"31-60"},
+  {tenant:"John Smith",prop:"The Pearl Residences",unit:"101",amt:13300,oldest:"2026-07-01",bucket:"31-60"},
+  {tenant:"Elena Petrova",prop:"West Bay Towers",unit:"302",amt:9000,oldest:"2026-08-01",bucket:"1-30"},
+  {tenant:"Ahmed Hassan",prop:"The Pearl Residences",unit:"103",amt:5000,oldest:"2026-08-01",bucket:"1-30"},
+];
+const BUCKETS = {"Current":0,"1-30":14000,"31-60":29300,"61-90":24000,"90+":33000};
+
+const TREND = [
+  {m:"Mar",exp:342000,col:328000},{m:"Apr",exp:349000,col:341000},
+  {m:"May",exp:355000,col:330000},{m:"Jun",exp:358000,col:349000},
+  {m:"Jul",exp:361000,col:338000},{m:"Aug",exp:361000,col:284000},
+];
+const MAINT_CAT = [{c:"HVAC / AC",n:2},{c:"Plumbing",n:1},{c:"Electrical",n:1},{c:"Appliances",n:1},{c:"Locks & Security",n:1}];
+
+const ORGS = [
+  {name:"Pearl Property Management",email:"info@pearlpm.qa",plan:"Growth",members:5,units:54,leases:35,created:"2026-08-18",status:"Active",onb:"complete"},
+  {name:"Doha Estate Partners",email:"admin@dohaestate.qa",plan:"Starter",members:2,units:23,leases:18,created:"2026-07-02",status:"Active",onb:"complete"},
+  {name:"Lusail Living",email:"hello@lusailliving.qa",plan:"Trial",members:1,units:0,leases:0,created:"2026-08-11",status:"Trial",onb:"portfolio"},
+  {name:"Msheireb Residences Co.",email:"ops@msheirebres.qa",plan:"Professional",members:11,units:187,leases:164,created:"2026-03-19",status:"Active",onb:"complete"},
+  {name:"Al Khor Property Group",email:"info@alkhorpg.qa",plan:"Growth",members:4,units:61,leases:44,created:"2026-05-27",status:"Suspended",onb:"complete"},
+];
+
+const AUDIT = [
+  {at:"2026-08-18T11:42:00",org:"Pearl Property Management",actor:"Mariam Al-Kuwari",act:"payment.confirmed",ent:"payments"},
+  {at:"2026-08-18T11:20:00",org:"Pearl Property Management",actor:"Mariam Al-Kuwari",act:"cheque.bounced",ent:"cheques"},
+  {at:"2026-08-18T10:55:00",org:"Msheireb Residences Co.",actor:"Sara Al-Mannai",act:"lease.activated",ent:"leases"},
+  {at:"2026-08-18T09:31:00",org:"Pearl Property Management",actor:"Ahmed Khalil",act:"work_order.created",ent:"work_orders"},
+  {at:"2026-08-17T16:04:00",org:"Doha Estate Partners",actor:"Omar Nasser",act:"owner_statement.finalised",ent:"owner_statements"},
+  {at:"2026-08-17T14:48:00",org:"Al Khor Property Group",actor:"RentOS Platform Admin",act:"platform.organisation.suspended",ent:"organisations"},
+  {at:"2026-08-17T11:12:00",org:"Pearl Property Management",actor:"Fatima Al-Sulaiti",act:"invitation.sent",ent:"invitations"},
+  {at:"2026-08-16T18:20:00",org:"Msheireb Residences Co.",actor:"Sara Al-Mannai",act:"lease.renewal_offered",ent:"lease_renewal_offers"},
+];
+
+/* ---------- icons ---------- */
+const I = {
+  dash:'<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>',
+  build:'<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14"/><path d="M9 9h1M9 13h1M14 9h1M14 13h1M9 21v-4h6v4"/></svg>',
+  user:'<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>',
+  users:'<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2 21c0-3.5 3.5-5.5 7-5.5s7 2 7 5.5"/><path d="M17 11a3 3 0 100-6M18 20c0-2.5-1-4-2.5-5"/></svg>',
+  file:'<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H7a2 2 0 00-2 2v16a2 2 0 002 2h10a2 2 0 002-2V7z"/><path d="M14 2v5h5M9 13h6M9 17h4"/></svg>',
+  wallet:'<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 7a2 2 0 012-2h13a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M16 12h3M3 9h18"/></svg>',
+  bank:'<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 10h18M5 10v9M19 10v9M9 10v9M15 10v9M2 21h20M12 3l9 5H3z"/></svg>',
+  wrench:'<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 105.4 5.4l-1.8-1.8 1.4-1.4 1.8 1.8A6 6 0 0113 4.9l1.7 1.4z"/><path d="M13 11L4 20l-1 1 1 1 1-1 9-9"/></svg>',
+  chart:'<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>',
+  cog:'<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>',
+  up:'<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>',
+  home:'<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>',
+  receipt:'<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M5 3v18l2-1.5L9 21l2-1.5L13 21l2-1.5L17 21l2-1.5V3z"/><path d="M9 8h6M9 12h6"/></svg>',
+  brief:'<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M9 7V5a2 2 0 012-2h2a2 2 0 012 2v2"/></svg>',
+  clip:'<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 3h6v3H9zM9 11h6M9 15h4"/></svg>',
+  plus:'<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',
+  search:'<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>',
+  bell:'<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 8a6 6 0 10-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>',
+  warn:'<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>',
+  arrow:'<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>',
+  check:'<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>',
+  pin:'<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 21s7-5.5 7-11a7 7 0 10-14 0c0 5.5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+  act:'<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>',
+  card:'<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>',
+  plug:'<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 2v6M15 2v6M6 8h12v4a6 6 0 01-12 0zM12 18v4"/></svg>',
+  life:'<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M4.9 4.9l4.2 4.2M14.9 14.9l4.2 4.2M19.1 4.9l-4.2 4.2M9.1 14.9l-4.2 4.2"/></svg>',
+};
+
+/* ---------- helpers ---------- */
+const el = (h) => { const d=document.createElement("div"); d.innerHTML=h.trim(); return d.firstElementChild; };
+const pillFor = s => {
+  const m = {
+    "Paid":"success","Confirmed":"success","Active":"success","Cleared":"success","Occupied":"success","Completed":"success","Finalised":"success","approved":"success",
+    "Partial":"warn","Expiring":"warn","Pending Verification":"warn","Submitted":"info","Due Soon":"warn","Scheduled":"info","In Progress":"warn","Waiting":"warn","Maintenance":"warn","Trial":"info","pending":"warn",
+    "Overdue":"danger","Bounced":"danger","Rejected":"danger","Terminated":"danger","Expired":"danger","Emergency":"danger","Suspended":"danger","rejected":"danger",
+    "Renewal Offered":"info","Assigned":"info","Draft":"neutral","Upcoming":"neutral","Vacant":"neutral","Received":"neutral","Stored":"neutral","Closed":"outline","High":"warn","Normal":"neutral","Low":"outline",
+  };
+  return `<span class="pill p-${m[s]||"neutral"}">${s}</span>`;
+};
+const stat = (label,value,{sub,tone,pct,icon}={}) => {
+  const col = {success:"var(--success)",warn:"var(--warn)",danger:"var(--danger)"}[tone]||"var(--text)";
+  const bar = {success:"#10b981",warn:"#f59e0b",danger:"#ef4444"}[tone]||"#171717";
+  return `<div class="stat">
+    <div class="stat-l"><span>${label}</span>${icon?`<span style="width:15px;height:15px;color:#d4d4d4">${icon}</span>`:""}</div>
+    <div class="stat-v" style="color:${col}">${value}</div>
+    ${sub?`<div class="stat-s">${sub}</div>`:""}
+    ${pct!=null?`<div class="bar"><i style="width:${Math.min(100,pct)}%;background:${bar}"></i></div>`:""}
+  </div>`;
+};
+const table = (cols, rows) => `<div class="tablewrap"><table><thead><tr>${cols.map(c=>`<th${c.r?' class="num"':''}>${c.t}</th>`).join("")}</tr></thead><tbody class="stagger">${rows}</tbody></table></div>`;
+const empty = (icon,title,desc,cta) => `<div class="empty"><div class="ic" style="padding:11px">${icon}</div><div style="font-weight:500">${title}</div><div class="sub" style="max-width:380px;margin:4px auto 0">${desc}</div>${cta?`<div style="margin-top:14px">${cta}</div>`:""}</div>`;
+
+/* ---------- charts (inline SVG, no library) ---------- */
+function barChart(data){
+  const w=560,h=200,pad=30,max=Math.max(...data.map(d=>d.exp))*1.1;
+  const bw=(w-pad)/data.length;
+  return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:200px">
+    ${[0,.25,.5,.75,1].map(t=>`<line x1="${pad}" x2="${w}" y1="${(h-24)-(h-44)*t}" y2="${(h-24)-(h-44)*t}" stroke="#f1f5f9" stroke-width="1"/>`).join("")}
+    ${data.map((d,i)=>{
+      const x=pad+i*bw+bw*.16, bwid=bw*.3;
+      const he=(d.exp/max)*(h-44), hc=(d.col/max)*(h-44);
+      return `<rect x="${x}" y="${h-24-he}" width="${bwid}" height="${he}" rx="3" fill="#d4d4d4">
+                <animate attributeName="height" from="0" to="${he}" dur="0.7s" fill="freeze"/>
+                <animate attributeName="y" from="${h-24}" to="${h-24-he}" dur="0.7s" fill="freeze"/></rect>
+              <rect x="${x+bwid+3}" y="${h-24-hc}" width="${bwid}" height="${hc}" rx="3" fill="#171717">
+                <animate attributeName="height" from="0" to="${hc}" dur="0.9s" fill="freeze"/>
+                <animate attributeName="y" from="${h-24}" to="${h-24-hc}" dur="0.9s" fill="freeze"/></rect>
+              <text x="${x+bwid}" y="${h-8}" font-size="10" fill="#64748b" text-anchor="middle" font-family="var(--font)">${d.m}</text>`;
+    }).join("")}
+  </svg>
+  <div style="display:flex;gap:16px;font-size:11.5px;color:var(--text-3);margin-top:6px">
+    <span style="display:flex;align-items:center;gap:5px"><i style="width:9px;height:9px;border-radius:2px;background:#d4d4d4;display:inline-block"></i>Expected</span>
+    <span style="display:flex;align-items:center;gap:5px"><i style="width:9px;height:9px;border-radius:2px;background:#171717;display:inline-block"></i>Collected</span>
+  </div>`;
+}
+function hBarChart(data){
+  const max=Math.max(...data.map(d=>d.n));
+  const shades=["#171717","#334155","#475569","#64748b","#94a3b8"];
+  return `<div style="display:flex;flex-direction:column;gap:9px;padding-top:4px">
+    ${data.map((d,i)=>`<div style="display:flex;align-items:center;gap:10px">
+      <span style="width:112px;font-size:12px;color:var(--text-2);text-align:right;flex-shrink:0">${d.c}</span>
+      <div style="flex:1;height:20px;background:#f8fafc;border-radius:4px;overflow:hidden">
+        <div style="height:100%;width:${(d.n/max)*100}%;background:${shades[i%5]};border-radius:4px;animation:grow .8s cubic-bezier(.22,1,.36,1) both;animation-delay:${i*60}ms"></div>
+      </div>
+      <span style="width:18px;font-size:12px;font-variant-numeric:tabular-nums;color:var(--text-2)">${d.n}</span>
+    </div>`).join("")}
+  </div>`;
+}
+
+/* =====================================================================
+   Views — manager app
+   ===================================================================== */
+const V = {};
+
+V.dashboard = () => `
+<div class="head anim-down"><div><h1>Good day, Fatima</h1><div class="sub">Portfolio overview for Pearl Property Management.</div></div>
+<div style="display:flex;gap:8px"><button class="btn out">${I.up} Export</button><button class="btn">${I.plus} New lease</button></div></div>
+
+<div class="grid g3 stagger" style="margin-bottom:22px">
+  <div class="alert a-danger"><span style="display:flex;align-items:center;gap:8px"><span style="width:15px;height:15px">${I.warn}</span>Overdue rent instalments</span><b>127</b></div>
+  <div class="alert a-danger"><span style="display:flex;align-items:center;gap:8px"><span style="width:15px;height:15px">${I.warn}</span>Bounced cheques</span><b>1</b></div>
+  <div class="alert a-warn"><span style="display:flex;align-items:center;gap:8px"><span style="width:15px;height:15px">${I.warn}</span>Cheques due in 30 days</span><b>3</b></div>
+  <div class="alert a-warn"><span style="display:flex;align-items:center;gap:8px"><span style="width:15px;height:15px">${I.warn}</span>Leases expiring in 60 days</span><b>2</b></div>
+  <div class="alert a-danger"><span style="display:flex;align-items:center;gap:8px"><span style="width:15px;height:15px">${I.warn}</span>Urgent maintenance</span><b>1</b></div>
+  <div class="alert a-warn"><span style="display:flex;align-items:center;gap:8px"><span style="width:15px;height:15px">${I.warn}</span>Payments awaiting verification</span><b>1</b></div>
+</div>
+
+<div class="sechead">Portfolio</div>
+<div class="grid g4 stagger">
+  ${stat("Properties","5",{icon:I.build})}
+  ${stat("Units","54",{sub:"16 vacant",icon:I.home})}
+  ${stat("Occupied","35",{tone:"success"})}
+  ${stat("Occupancy","65%",{pct:65,tone:"warn"})}
+</div>
+
+<div class="sechead">Rent this month</div>
+<div class="grid g5 stagger">
+  ${stat("Expected",QAR(361000),{icon:I.wallet})}
+  ${stat("Collected",QAR(284000),{tone:"success",icon:I.chart})}
+  ${stat("Outstanding",QAR(77000),{tone:"warn"})}
+  ${stat("Total arrears",QAR(100300),{tone:"danger",sub:"All periods"})}
+  ${stat("Collection rate","79%",{pct:79,tone:"warn"})}
+</div>
+
+<div class="grid g2" style="margin-top:22px">
+  <div class="card anim-up" style="padding:0">
+    <div class="card-h"><div class="card-t">Rent collected vs expected</div><div class="card-d">Last six months, from instalments and payment allocations.</div></div>
+    <div class="card-b">${barChart(TREND)}</div>
+  </div>
+  <div class="card anim-up" style="padding:0">
+    <div class="card-h"><div class="card-t">Open maintenance by category</div><div class="card-d">Requests not yet closed or cancelled.</div></div>
+    <div class="card-b">${hBarChart(MAINT_CAT)}</div>
+  </div>
+</div>
+
+<div class="grid g2" style="margin-top:14px">
+  <div class="card" style="padding:0">
+    <div class="card-h"><div class="card-t">Leases</div><div class="card-d">Expiries ahead, so renewals can start early.</div></div>
+    <div class="card-b"><div class="grid g4">
+      ${[["Active","35",""],["≤ 30 days","1","var(--danger)"],["≤ 60 days","2","var(--warn)"],["≤ 90 days","4",""]].map(([l,v,c])=>
+        `<div style="border:1px solid var(--border);border-radius:9px;padding:11px"><div style="font-size:11.5px;color:var(--text-3)">${l}</div><div style="font-size:19px;font-weight:600;margin-top:3px;color:${c||"var(--text)"};font-variant-numeric:tabular-nums">${v}</div></div>`).join("")}
+    </div></div>
+  </div>
+  <div class="card" style="padding:0">
+    <div class="card-h"><div class="card-t">Maintenance</div><div class="card-d">Open workload across the portfolio.</div></div>
+    <div class="card-b"><div class="grid g4">
+      ${[["New","1",""],["In progress","3",""],["Urgent","1","var(--danger)"],["Ageing > 7d","2","var(--danger)"]].map(([l,v,c])=>
+        `<div style="border:1px solid var(--border);border-radius:9px;padding:11px"><div style="font-size:11.5px;color:var(--text-3)">${l}</div><div style="font-size:19px;font-weight:600;margin-top:3px;color:${c||"var(--text)"};font-variant-numeric:tabular-nums">${v}</div></div>`).join("")}
+    </div></div>
+  </div>
+</div>`;
+
+V.properties = () => `
+<div class="head anim-down"><div><h1>Properties</h1><div class="sub">Every building, compound and commercial asset under management.</div></div>
+<button class="btn">${I.plus} Add property</button></div>
+<div class="toolbar">
+  <input class="inp" style="width:270px" placeholder="Search name, code or address…">
+  <select class="inp"><option>Type: All</option><option>Residential</option><option>Commercial</option><option>Villa Compound</option></select>
+</div>
+${table([{t:"Property"},{t:"Type"},{t:"Owner"},{t:"Units",r:1},{t:"Occupancy",r:1}],
+  PROPS.map(p=>{const pc=Math.round(p.occ/p.units*100);return `<tr>
+    <td><span class="link" onclick="go('property')">${p.name}</span><div class="mini">${p.code} · ${p.addr}</div></td>
+    <td><span class="pill p-outline">${p.type}</span></td>
+    <td class="muted">${p.owner}</td>
+    <td class="num">${p.units}</td>
+    <td class="num"><div style="display:flex;align-items:center;gap:8px;justify-content:flex-end">
+      <div style="width:64px;height:5px;background:#f0f0f0;border-radius:99px;overflow:hidden"><i style="display:block;height:100%;width:${pc}%;background:#10b981;border-radius:99px;animation:grow .8s ease-out both"></i></div>
+      <span style="width:34px;font-size:12px;color:var(--text-2)">${pc}%</span></div></td></tr>`}).join(""))}`;
+
+V.property = () => `
+<div class="crumbs anim-down"><span class="link" onclick="go('properties')">Properties</span><span>The Pearl Residences</span></div>
+<div class="head anim-down"><div><h1>The Pearl Residences</h1><div class="sub">Residential · PROP-001 · Porto Arabia, The Pearl, Doha</div></div>
+<div style="display:flex;gap:8px"><button class="btn">${I.plus} Add unit</button><button class="btn out">Edit</button></div></div>
+
+<div class="grid g4 stagger" style="margin-bottom:22px">
+  ${stat("Units","16",{sub:"3 vacant",icon:I.home})}
+  ${stat("Occupancy","75%",{pct:75,tone:"warn",sub:"12 of 16 occupied"})}
+  ${stat("Active leases","12",{icon:I.wallet})}
+  ${stat("Monthly rent roll",QAR(118500),{sub:"From active leases"})}
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 300px;gap:22px" class="respcols">
+<div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div style="font-weight:600;font-size:13.5px">Units</div><button class="btn ghost sm">View all units</button></div>
+  ${table([{t:"Unit"},{t:"Type"},{t:"Tenant"},{t:"Rent",r:1},{t:"Status"}],
+    UNITS.map(u=>`<tr>
+      <td><b>${u.no}</b> <span class="mini" style="display:inline">Floor ${u.floor}</span></td>
+      <td class="muted">${u.type} · ${u.beds} bed</td>
+      <td class="muted">${u.tenant?`<span class="link" onclick="go('lease')">${u.tenant}</span>`:"—"}</td>
+      <td class="num">${u.rent?QAR(u.rent):"—"}</td>
+      <td>${pillFor(u.status)}</td></tr>`).join(""))}
+</div>
+<aside style="display:flex;flex-direction:column;gap:12px">
+  <div class="card"><div class="card-t" style="margin-bottom:10px">Owners</div>
+    <div style="display:flex;justify-content:space-between;padding:6px 8px;border-radius:8px;font-size:13.5px"><span class="link" onclick="go('owner-detail')">Jassim Al-Thani</span><span class="muted">100%</span></div></div>
+  <div class="card"><div class="card-t" style="margin-bottom:10px">Details</div>
+    <dl class="dl"><div><dt>Management fee</dt><dd>8% of rent</dd></div>
+    <div><dt>Address</dt><dd style="max-width:170px;font-weight:400">Porto Arabia, The Pearl, Doha</dd></div>
+    <div><dt>Property code</dt><dd>PROP-001</dd></div></dl></div>
+</aside></div>`;
+
+V.leases = () => `
+<div class="head anim-down"><div><h1>Leases</h1><div class="sub">Every tenancy agreement in your portfolio.</div></div>
+<button class="btn">${I.plus} New lease</button></div>
+<div class="toolbar">
+  <input class="inp" style="width:230px" placeholder="Search lease code…">
+  <select class="inp"><option>Status: All</option><option>Active</option><option>Expiring</option><option>Renewal Offered</option></select>
+  <select class="inp"><option>Expiring: All</option><option>Within 30 days</option><option>Within 60 days</option><option>Within 90 days</option></select>
+</div>
+${table([{t:"Lease"},{t:"Tenant"},{t:"Unit"},{t:"Term"},{t:"Rent",r:1},{t:"Outstanding",r:1},{t:"Status"}],
+  LEASES.map(l=>{
+    const days=Math.ceil((new Date(l.end)-new Date("2026-08-18"))/864e5);
+    return `<tr>
+      <td><span class="link" onclick="go('lease')">${l.code}</span></td>
+      <td class="muted">${l.tenant}</td>
+      <td class="muted">${l.prop}<span style="color:#d4d4d4"> · ${l.unit}</span></td>
+      <td class="muted">${D(l.start)} → ${D(l.end)}${days<=90&&days>=0?`<div class="mini" style="color:${days<=30?"var(--danger)":"var(--warn)"}">${days} days remaining</div>`:""}</td>
+      <td class="num">${QAR(l.rent)}</td>
+      <td class="num" style="color:${l.outstanding?"var(--danger)":"#d4d4d4"}">${l.outstanding?QAR(l.outstanding):"—"}</td>
+      <td>${pillFor(l.status)}</td></tr>`}).join(""))}`;
+
+V.lease = () => `
+<div class="crumbs anim-down"><span class="link" onclick="go('leases')">Leases</span><span>LEASE-0001</span></div>
+<div class="head anim-down"><div><h1>LEASE-0001</h1><div class="sub">The Pearl Residences · Unit 101 · John Smith</div></div>
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${pillFor("Active")}
+<button class="btn">${I.receipt} Record payment</button>
+<button class="btn out">Offer renewal</button><button class="btn out">Terminate</button></div></div>
+
+<div class="grid g4 stagger" style="margin-bottom:22px">
+  ${stat("Monthly rent",QAR(9500),{icon:I.wallet})}
+  ${stat("Billed to date",QAR(114000),{sub:"12 instalments",icon:I.receipt})}
+  ${stat("Collected",QAR(100700),{tone:"success",pct:88,sub:"88% of billed"})}
+  ${stat("Outstanding",QAR(13300),{tone:"danger",sub:QAR(9500)+" overdue"})}
+</div>
+
+<div class="tabs"><span class="tab on">Rent schedule</span><span class="tab">Terms</span><span class="tab">Renewals</span><span class="tab">History</span></div>
+
+${table([{t:"#"},{t:"Due date"},{t:"Amount",r:1},{t:"Outstanding",r:1},{t:"Status"},{t:"Payments applied"}],
+  SCHEDULE.map(s=>`<tr>
+    <td class="muted">${s.n}</td><td>${D(s.due)}</td>
+    <td class="num">${QAR(s.amt)}</td>
+    <td class="num">${s.out?QAR(s.out):"—"}</td>
+    <td>${pillFor(s.status)}</td>
+    <td>${s.alloc.length?s.alloc.map(a=>`<span class="pill p-outline" style="margin-right:4px">${QAR(a.amt)} · ${a.ref}</span>`).join(""):'<span class="mini">None</span>'}</td>
+  </tr>`).join(""))}
+
+<div class="card" style="margin-top:14px;background:#f0f9ff;border-color:#bae6fd">
+  <div style="font-size:13px;color:#0369a1"><b>Instalment 6 shows how allocation works.</b> QAR 9,500 was due; a QAR 5,700 cash payment was allocated against it, leaving QAR 3,800 outstanding — so the status is <b>Partial</b>, not Paid. Payments and rent obligations are separate records joined by allocations, never a single "paid" flag.</div>
+</div>`;
+
+V.tenants = () => `
+<div class="head anim-down"><div><h1>Tenants</h1><div class="sub">Everyone renting a unit in your portfolio.</div></div>
+<button class="btn">${I.plus} Add tenant</button></div>
+<div class="toolbar"><input class="inp" style="width:280px" placeholder="Search name, phone, email or QID…">
+<select class="inp"><option>Tenancy: All</option><option>Has a lease</option><option>No lease</option></select></div>
+${table([{t:"Tenant"},{t:"Contact"},{t:"QID / Passport"},{t:"Unit"},{t:"Lease"}],
+  TENANTS.map(t=>`<tr>
+    <td><span class="link">${t.name}</span><div class="mini">${t.nat}</div></td>
+    <td class="muted">${t.phone}<div class="mini">${t.email}</div></td>
+    <td class="muted">${t.qid}</td>
+    <td class="muted">${t.unit}</td>
+    <td>${pillFor(t.status)}</td></tr>`).join(""))}`;
+
+V.owners = () => `
+<div class="head anim-down"><div><h1>Owners</h1><div class="sub">Landlords and investors whose properties you manage.</div></div>
+<button class="btn">${I.plus} Add owner</button></div>
+<div class="toolbar"><input class="inp" style="width:280px" placeholder="Search name, email, phone or QID…">
+<select class="inp"><option>Type: All</option><option>Individual</option><option>Company</option></select></div>
+${table([{t:"Owner"},{t:"Type"},{t:"Contact"},{t:"QID / CR"},{t:"Properties",r:1}],
+  OWNERS.map(o=>`<tr>
+    <td><span class="link" onclick="go('owner-detail')">${o.name}</span></td>
+    <td><span class="pill p-outline">${o.kind}</span></td>
+    <td class="muted">${o.email}<div class="mini">${o.phone}</div></td>
+    <td class="muted">${o.id_no}</td>
+    <td class="num">${o.props}</td></tr>`).join(""))}`;
+
+V["owner-detail"] = () => `
+<div class="crumbs anim-down"><span class="link" onclick="go('owners')">Owners</span><span>Jassim Al-Thani</span></div>
+<div class="head anim-down"><div><h1>Jassim Al-Thani</h1><div class="sub">Individual · 28511012345 · jassim.althani@example.qa</div></div></div>
+<div class="grid g4 stagger" style="margin-bottom:22px">
+  ${stat("Properties","1",{icon:I.build})}${stat("Units","16",{sub:"12 occupied",icon:I.home})}
+  ${stat("Occupancy","75%",{pct:75})}${stat("Monthly rent roll",QAR(118500),{icon:I.wallet})}</div>
+<div class="tabs"><span class="tab on">Properties</span><span class="tab">Details</span><span class="tab">Statements</span></div>
+${table([{t:"Property"},{t:"Code"},{t:"Ownership",r:1}],
+  `<tr><td><span class="link" onclick="go('property')">The Pearl Residences</span></td><td class="muted">PROP-001</td><td class="num">100%</td></tr>`)}`;
+
+V.payments = () => `
+<div class="crumbs anim-down"><span class="link" onclick="go('finance')">Finance</span><span>Payments</span></div>
+<div class="head anim-down"><div><h1>Payments</h1><div class="sub">Every payment received, and what it was allocated to.</div></div></div>
+<div class="alert a-warn anim-down" style="margin-bottom:16px"><span style="display:flex;align-items:center;gap:8px"><span style="width:15px;height:15px">${I.warn}</span>1 payment awaiting verification on this page.</span></div>
+<div class="toolbar"><input class="inp" style="width:230px" placeholder="Search by reference…">
+<select class="inp"><option>Status: All</option><option>Pending verification</option><option>Confirmed</option><option>Rejected</option></select>
+<select class="inp"><option>Method: All</option><option>Bank transfer</option><option>Post-dated cheque</option><option>Cash</option></select></div>
+${table([{t:"Date"},{t:"Tenant"},{t:"Lease"},{t:"Method"},{t:"Reference"},{t:"Amount",r:1},{t:"Allocated",r:1},{t:"Status"},{t:"Actions",r:1}],
+  PAYMENTS.map(p=>`<tr>
+    <td>${D(p.date)}</td><td class="muted">${p.tenant}</td>
+    <td class="muted"><span class="link" onclick="go('lease')">${p.lease}</span></td>
+    <td class="muted">${p.method}</td>
+    <td class="muted">${p.ref}${p.receipt?`<div class="mini">${p.receipt}</div>`:""}${p.reason?`<div class="mini" style="color:var(--danger);max-width:200px">${p.reason}</div>`:""}</td>
+    <td class="num"><b>${QAR(p.amt)}</b></td>
+    <td class="num">${QAR(p.alloc)}</td>
+    <td>${pillFor(p.status)}</td>
+    <td class="num">${p.status==="Pending Verification"?`<button class="btn out sm">${I.check} Confirm</button> <button class="btn ghost sm">Reject</button>`:'<span style="color:#e5e5e5">—</span>'}</td>
+  </tr>`).join(""))}`;
+
+V.cheques = () => `
+<div class="crumbs anim-down"><span>Payments</span><span>Cheques</span></div>
+<div class="head anim-down"><div><h1>Cheques</h1><div class="sub">Post-dated cheques held against leases, with full banking history.</div></div>
+<button class="btn">${I.plus} Record cheque</button></div>
+<div class="alert a-warn anim-down" style="margin-bottom:16px"><span style="display:flex;align-items:center;gap:8px"><span style="width:15px;height:15px">${I.warn}</span>3 cheques are dated within the next 30 days and not yet submitted to the bank.</span></div>
+<div class="toolbar"><input class="inp" style="width:280px" placeholder="Search cheque number, bank or payer…">
+<select class="inp"><option>Status: All</option><option>Received</option><option>Submitted</option><option>Cleared</option><option>Bounced</option></select></div>
+${table([{t:"Cheque"},{t:"Bank"},{t:"Payer"},{t:"Lease"},{t:"Cheque date"},{t:"Amount",r:1},{t:"Status"}],
+  CHEQUES.map(c=>{
+    const days=Math.ceil((new Date(c.date)-new Date("2026-08-18"))/864e5);
+    return `<tr>
+      <td><span class="link" onclick="go('cheque')">${c.no}</span></td>
+      <td class="muted">${c.bank}</td><td class="muted">${c.payer}</td>
+      <td class="muted"><span class="link" onclick="go('lease')">${c.lease}</span></td>
+      <td>${D(c.date)}${c.due?` <span class="pill p-warn">${days<0?"Past due":days+"d"}</span>`:""}</td>
+      <td class="num">${QAR(c.amt)}</td><td>${pillFor(c.status)}</td></tr>`}).join(""))}`;
+
+V.cheque = () => `
+<div class="crumbs anim-down"><span>Payments</span><span class="link" onclick="go('cheques')">Cheques</span><span>CHQ773455</span></div>
+<div class="head anim-down"><div><h1>Cheque CHQ773455</h1><div class="sub">Doha Bank · Elena Petrova · ${QAR(54000)}</div></div>${pillFor("Bounced")}</div>
+<div style="display:grid;grid-template-columns:1fr 320px;gap:22px" class="respcols">
+<div style="display:flex;flex-direction:column;gap:14px">
+  <div class="card" style="padding:0"><div class="card-h"><div class="card-t">Cheque lifecycle</div><div class="card-d">Every status change is recorded automatically, including who made it and when.</div></div>
+  <div class="card-b"><ul class="timeline">${CHEQUE_TIMELINE.map(t=>`<li class="anim-in">
+    <div style="display:flex;align-items:center;gap:8px">${pillFor(t.to)}${t.from?`<span class="mini">from ${t.from.toLowerCase()}</span>`:""}</div>
+    <div class="t-d" style="margin-top:2px">${DT(t.at)}</div>
+    <div style="font-size:13px;color:var(--text-2);margin-top:3px">${t.note}</div></li>`).join("")}</ul></div></div>
+
+  <div class="card" style="padding:0"><div class="card-h"><div class="card-t">Next steps</div><div class="card-d">Only transitions valid from the current status are offered.</div></div>
+  <div class="card-b" style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn out sm">Record replacement cheque</button><button class="btn ghost sm">Cancel cheque</button></div></div>
+</div>
+<aside style="display:flex;flex-direction:column;gap:12px">
+  <div class="card"><div class="card-t" style="margin-bottom:8px">Details</div>
+  <dl class="dl">
+    <div><dt>Amount</dt><dd>${QAR(54000)}</dd></div><div><dt>Cheque date</dt><dd>04 Aug 2026</dd></div>
+    <div><dt>Received</dt><dd>15 Jun 2026</dd></div><div><dt>Bank</dt><dd>Doha Bank</dd></div>
+    <div><dt>Payer</dt><dd>Elena Petrova</dd></div><div><dt>Lease</dt><dd><span class="link" onclick="go('lease')">LEASE-0007</span></dd></div>
+  </dl></div>
+  <div class="card"><div class="card-t" style="margin-bottom:8px">Linked instalment</div>
+  <div style="font-size:13.5px"><div>Instalment #2</div><div class="muted">Due 01 Aug 2026</div>
+  <div style="font-variant-numeric:tabular-nums;margin-top:2px">${QAR(54000)} outstanding</div>
+  <div style="margin-top:10px;background:#fef2f2;color:#b91c1c;padding:8px 10px;border-radius:8px;font-size:12px">Bounced — the rent remains outstanding and the tenant has been notified.</div></div></div>
+</aside></div>`;
+
+V.finance = () => `
+<div class="head anim-down"><div><h1>Finance</h1><div class="sub">Rent, costs and what's payable to owners this month.</div></div></div>
+<div class="sechead">This month</div>
+<div class="grid g4 stagger">
+  ${stat("Expected rent",QAR(361000),{icon:I.wallet})}
+  ${stat("Received",QAR(284000),{tone:"success",pct:79,sub:"79% collected",icon:I.chart})}
+  ${stat("Outstanding",QAR(77000),{tone:"warn"})}
+  ${stat("Total arrears",QAR(100300),{tone:"danger",sub:"All past periods"})}
+</div>
+<div class="sechead">Costs and payouts</div>
+<div class="grid g3 stagger">
+  ${stat("Expenses",QAR(12800),{sub:"Approved only"})}
+  ${stat("Management fees",QAR(28880),{})}
+  ${stat("Owner payable",QAR(242320),{tone:"success",sub:"Received less costs",icon:I.wallet})}
+</div>
+<div class="grid g3" style="margin-top:22px">
+  ${[["Payments","Record, verify and allocate money received.","payments",I.receipt],
+     ["Outstanding rent","Arrears ageing across every lease.","outstanding",I.chart],
+     ["Expenses","Property costs, approvals and invoices.","expenses",I.wallet],
+     ["Owner statements","Generate and finalise monthly statements.","statements",I.file],
+     ["Cheques","Post-dated cheque lifecycle and banking.","cheques",I.bank],
+     ["Reports","Portfolio, collection and performance.","reports",I.chart]].map(([t,d,r,ic])=>
+    `<div class="card" style="cursor:pointer;transition:transform .18s,box-shadow .18s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 18px rgba(0,0,0,.06)'" onmouseout="this.style.transform='';this.style.boxShadow=''" onclick="go('${r}')">
+      <div class="card-t" style="display:flex;align-items:center;gap:8px"><span style="width:16px;height:16px;color:#a3a3a3">${ic}</span>${t}</div>
+      <div class="card-d" style="margin-top:4px">${d}</div>
+      <div style="font-size:12px;color:var(--text-3);margin-top:12px;display:flex;align-items:center;gap:4px">Open <span style="width:12px;height:12px">${I.arrow}</span></div></div>`).join("")}
+</div>`;
+
+V.outstanding = () => `
+<div class="crumbs anim-down"><span class="link" onclick="go('finance')">Finance</span><span>Outstanding</span></div>
+<div class="head anim-down"><div><h1>Outstanding rent</h1><div class="sub">Arrears ageing across every active lease, oldest debt first.</div></div>
+<button class="btn out">${I.up} Export CSV</button></div>
+<div class="grid g5 stagger" style="margin-bottom:22px">
+  ${Object.entries(BUCKETS).map(([k,v],i)=>{
+    const tones=["","warn","warn","danger","danger"];const total=Object.values(BUCKETS).reduce((a,b)=>a+b,0);
+    return stat(k==="Current"?"Current":k+" days",QAR(v),{tone:tones[i]||undefined,pct:total?v/total*100:0})}).join("")}
+</div>
+${table([{t:"Tenant"},{t:"Property"},{t:"Unit"},{t:"Oldest due date"},{t:"Ageing"},{t:"Amount owed",r:1}],
+  ARREARS.map(a=>`<tr>
+    <td><span class="link" onclick="go('lease')">${a.tenant}</span></td>
+    <td class="muted">${a.prop}</td><td class="muted">${a.unit}</td><td class="muted">${D(a.oldest)}</td>
+    <td>${pillFor(a.bucket==="1-30"?"Partial":a.bucket==="31-60"?"Partial":"Overdue").replace(/>(Partial|Overdue)</,">"+a.bucket+" days<")}</td>
+    <td class="num" style="color:var(--danger);font-weight:500">${QAR(a.amt)}</td></tr>`).join(""))}`;
+
+V.expenses = () => `
+<div class="crumbs anim-down"><span class="link" onclick="go('finance')">Finance</span><span>Expenses</span></div>
+<div class="head anim-down"><div><h1>Expenses</h1><div class="sub">Property costs. Only approved expenses reach owner statements.</div></div>
+<button class="btn">${I.plus} Record expense</button></div>
+<div class="toolbar"><input class="inp" style="width:230px" placeholder="Search description…">
+<select class="inp"><option>Approval: All</option><option>Pending</option><option>Approved</option><option>Rejected</option></select></div>
+${table([{t:"Date"},{t:"Description"},{t:"Property"},{t:"Category"},{t:"Vendor"},{t:"Amount",r:1},{t:"Approval"},{t:"Actions",r:1}],
+  EXPENSES.map(e=>`<tr>
+    <td>${D(e.date)}</td><td>${e.desc}</td>
+    <td class="muted">${e.prop}<div class="mini">${e.owner}</div></td>
+    <td class="muted">${e.cat}</td><td class="muted">${e.vendor}</td>
+    <td class="num"><b>${QAR(e.amt)}</b></td><td>${pillFor(e.status)}</td>
+    <td class="num">${e.status==="pending"?`<button class="btn out sm">${I.check} Approve</button>`:'<span style="color:#e5e5e5">—</span>'}</td></tr>`).join(""))}`;
+
+V.statements = () => `
+<div class="crumbs anim-down"><span class="link" onclick="go('finance')">Finance</span><span>Owner statements</span></div>
+<div class="head anim-down"><div><h1>Owner statements</h1><div class="sub">Monthly statements become immutable once finalised. Changes are issued as a new version.</div></div>
+<button class="btn">${I.file} Generate statement</button></div>
+${table([{t:"Owner"},{t:"Period"},{t:"Rent received",r:1},{t:"Costs",r:1},{t:"Payout",r:1},{t:"Closing",r:1},{t:"Status"},{t:"Actions",r:1}],
+  STATEMENTS.map(s=>`<tr>
+    <td><span class="link" onclick="go('owner-detail')">${s.owner}</span></td>
+    <td class="muted">${D(s.from)} – ${D(s.to)}${s.v>1?` <span class="pill p-info">v${s.v}</span>`:""}</td>
+    <td class="num">${QAR(s.rent)}</td>
+    <td class="num">${QAR(s.exp+s.maint+s.fee)}</td>
+    <td class="num" style="color:var(--success);font-weight:500">${QAR(s.payout)}</td>
+    <td class="num">${QAR(s.close)}</td>
+    <td>${pillFor(s.status)}</td>
+    <td class="num">${s.status==="Draft"?'<button class="btn out sm">Finalise</button>':'<span class="mini">Locked</span>'}</td></tr>`).join(""))}
+<div class="card" style="margin-top:14px;background:#fafafa">
+  <div style="font-size:12.5px;color:var(--text-2)"><b>How the payout is computed:</b> rent received + other income − expenses − maintenance − management fees + adjustments. The closing balance chains from the previous period's opening balance, so consecutive statements link correctly.</div></div>`;
+
+V.maintenance = () => `
+<div class="head anim-down"><div><h1>Maintenance</h1><div class="sub">Requests raised by tenants and staff, and the work orders resolving them.</div></div></div>
+<div class="toolbar"><input class="inp" style="width:280px" placeholder="Search request code or description…">
+<select class="inp"><option>Status: All</option><option>Submitted</option><option>Assigned</option><option>In Progress</option><option>Completed</option></select>
+<select class="inp"><option>Priority: All</option><option>Emergency</option><option>High</option><option>Normal</option><option>Low</option></select></div>
+${table([{t:"Request"},{t:"Location"},{t:"Category"},{t:"Priority"},{t:"Assigned to"},{t:"Age"},{t:"Status"}],
+  MAINT.map(m=>`<tr>
+    <td><span class="link" onclick="go('maint-detail')">${m.code}</span><div class="mini" style="max-width:230px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.desc}</div></td>
+    <td class="muted">${m.prop}<span style="color:#d4d4d4"> · ${m.unit}</span><div class="mini">${m.tenant}</div></td>
+    <td class="muted">${m.cat}</td><td>${pillFor(m.pri)}</td>
+    <td class="muted">${m.vendor||"Unassigned"}</td>
+    <td><span style="color:${m.age>7?"var(--danger)":"var(--text-2)"}">${m.age}d</span></td>
+    <td>${pillFor(m.status)}</td></tr>`).join(""))}`;
+
+V["maint-detail"] = () => `
+<div class="crumbs anim-down"><span class="link" onclick="go('maintenance')">Maintenance</span><span>MR-0001</span></div>
+<div class="head anim-down"><div><h1>MR-0001</h1><div class="sub">The Pearl Residences · Unit 101 · HVAC / AC</div></div>
+<div style="display:flex;gap:8px;align-items:center">${pillFor("High")}<select class="inp" style="width:150px"><option>Assigned</option><option>Reviewing</option><option>Completed</option><option>Closed</option></select><button class="btn out">Reassign</button></div></div>
+<div style="display:grid;grid-template-columns:1fr 320px;gap:22px" class="respcols">
+<div style="display:flex;flex-direction:column;gap:14px">
+  <div class="card"><div class="card-t">Reported issue</div><div class="card-d" style="margin-bottom:10px">Raised 15 Aug 2026, 09:24</div>
+    <p style="font-size:13.5px;line-height:1.6">AC unit in the living room is running but blowing warm air. Started two days ago, gets worse in the afternoon.</p>
+    <div style="margin-top:10px;background:#fafafa;padding:10px;border-radius:9px;font-size:13px;color:var(--text-2)"><b style="color:var(--text)">Access:</b> Please call before arriving. Tenant is home after 4pm on weekdays.</div></div>
+
+  <div class="card" style="padding:0"><div class="card-h"><div class="card-t">Work order</div><div class="card-d">Assigned to Rashid Cooling Services</div></div>
+  <div class="card-b"><div class="grid g4" style="margin-bottom:12px">
+    ${[["Scheduled","19 Aug, 16:00"],["Estimated cost",QAR(350)],["Approved cap",QAR(500)],["Actual cost","—"]].map(([l,v])=>
+      `<div style="border:1px solid var(--border);border-radius:9px;padding:10px"><div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3)">${l}</div><div style="font-size:13px;font-weight:500;margin-top:3px">${v}</div></div>`).join("")}
+  </div>
+  <ul class="timeline">
+    <li class="anim-in"><div class="t-t">Assigned</div><div class="t-d">15 Aug 2026, 11:02</div><div style="font-size:13px;color:var(--text-2)">Assigned to Rashid Cooling Services.</div></li>
+    <li class="anim-in"><div class="t-t">Accepted</div><div class="t-d">15 Aug 2026, 13:40</div><div style="font-size:13px;color:var(--text-2)">Vendor accepted the job.</div></li>
+    <li class="anim-in"><div class="t-t">Scheduled</div><div class="t-d">16 Aug 2026, 08:15</div><div style="font-size:13px;color:var(--text-2)">Visit booked for 19 Aug at 4pm.</div></li>
+  </ul></div></div>
+
+  <div class="card" style="padding:0"><div class="card-h"><div class="card-t">Comments</div><div class="card-d">Internal notes are never shown to the tenant.</div></div>
+  <div class="card-b">
+    <div style="background:#fafafa;border-radius:9px;padding:11px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:3px"><b>Ahmed Khalil</b><span class="muted">15 Aug 2026</span></div>
+      <div style="font-size:13.5px">Technician booked for Wednesday afternoon. Tenant confirmed they'll be home.</div></div>
+    <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:9px;padding:11px">
+      <div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:3px"><b>Ahmed Khalil</b><span style="display:flex;gap:6px;align-items:center"><span class="pill p-warn">Internal</span><span class="muted">16 Aug</span></span></div>
+      <div style="font-size:13.5px">Third AC callout in this building this quarter — worth reviewing the service contract.</div></div>
+  </div></div>
+</div>
+<aside><div class="card"><div class="card-t" style="margin-bottom:8px">Details</div>
+  <dl class="dl"><div><dt>Status</dt><dd>${pillFor("Assigned")}</dd></div>
+  <div><dt>Property</dt><dd><span class="link" onclick="go('property')">The Pearl Residences</span></dd></div>
+  <div><dt>Unit</dt><dd>101</dd></div><div><dt>Tenant</dt><dd>John Smith</dd></div>
+  <div><dt>Contact</dt><dd>+974 5533 1122</dd></div></dl></div></aside></div>`;
+
+V.reports = () => `
+<div class="head anim-down"><div><h1>Reports</h1><div class="sub">Portfolio, collections, expiries and operational performance.</div></div>
+<button class="btn out">${I.up} Export</button></div>
+<div class="grid g4 stagger" style="margin-bottom:22px">
+  ${stat("Properties","5",{icon:I.build})}${stat("Units","54",{sub:"16 vacant"})}
+  ${stat("Occupancy","65%",{pct:65,tone:"warn"})}${stat("Monthly rent roll",QAR(361000),{icon:I.chart})}</div>
+<div class="tabs"><span class="tab on">Portfolio</span><span class="tab">Collection</span><span class="tab">Lease expiry</span><span class="tab">Cheques</span><span class="tab">Maintenance</span><span class="tab">Vendors</span></div>
+${table([{t:"Property"},{t:"Type"},{t:"Units",r:1},{t:"Occupied",r:1},{t:"Vacant",r:1},{t:"Occupancy",r:1},{t:"Monthly rent",r:1}],
+  PROPS.map(p=>{const pc=Math.round(p.occ/p.units*100);return `<tr>
+    <td><b>${p.name}</b></td><td class="muted">${p.type}</td>
+    <td class="num">${p.units}</td><td class="num">${p.occ}</td><td class="num">${p.units-p.occ}</td>
+    <td class="num" style="color:${pc>=85?"var(--success)":pc>=60?"var(--warn)":"var(--danger)"}">${pc}%</td>
+    <td class="num">${QAR(p.rent)}</td></tr>`}).join(""))}
+<div class="grid g2" style="margin-top:14px">
+  <div class="card" style="padding:0"><div class="card-h"><div class="card-t">Collection trend</div></div><div class="card-b">${barChart(TREND)}</div></div>
+  <div class="card" style="padding:0"><div class="card-h"><div class="card-t">Vendor performance</div></div><div class="card-b">
+  ${table([{t:"Vendor"},{t:"Assigned",r:1},{t:"Done",r:1},{t:"Rate",r:1}],
+    [["Rashid Cooling Services",8,7,88],["Al Reem Plumbing",5,4,80],["Doha Electrical Works",3,3,100]].map(([n,a,c,r])=>
+      `<tr><td>${n}</td><td class="num">${a}</td><td class="num">${c}</td><td class="num" style="color:${r>=80?"var(--success)":"var(--warn)"}">${r}%</td></tr>`).join(""))}
+  </div></div>
+</div>`;
+
+V.settings = () => `
+<div class="head anim-down"><div><h1>Settings</h1><div class="sub">Configure Pearl Property Management — company details, team, payments and integrations.</div></div></div>
+<div class="tabs"><span class="tab on">Team</span><span class="tab">Company</span><span class="tab">Bank accounts</span><span class="tab">Integrations</span><span class="tab">Features</span></div>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+  <div><div style="font-weight:600;font-size:13.5px">Team members</div><div class="mini">Invitations expire after 7 days and can only be used once.</div></div>
+  <button class="btn sm">${I.plus} Invite member</button></div>
+${table([{t:"Name"},{t:"Email"},{t:"Roles"},{t:"Status"}],
+  [["Fatima Al-Sulaiti","admin@pearlpm.qa","Organisation Admin"],
+   ["Ahmed Khalil","manager@pearlpm.qa","Property Manager, Maintenance Manager"],
+   ["Mariam Al-Kuwari","accountant@pearlpm.qa","Accountant"],
+   ["Jassim Al-Thani","owner@pearlpm.qa","Property Owner"],
+   ["John Smith","tenant@pearlpm.qa","Tenant"]].map(([n,e,r])=>
+   `<tr><td><b>${n}</b></td><td class="muted">${e}</td><td>${r.split(", ").map(x=>`<span class="pill p-outline" style="margin-right:4px">${x}</span>`).join("")}</td><td>${pillFor("Active")}</td></tr>`).join(""))}
+<div class="sechead">Integrations</div>
+<div class="grid g3 stagger">
+  ${[["Online payments","Card and wallet payments from the tenant portal.",false],
+     ["Transactional email","Invitations, receipts, reminders and renewal offers.",false],
+     ["WhatsApp Business","Rent reminders and maintenance updates.",false]].map(([t,d,ok])=>
+   `<div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><div class="card-t" style="display:flex;gap:7px;align-items:center"><span style="width:15px;height:15px;color:#a3a3a3">${I.plug}</span>${t}</div>${pillFor(ok?"Confirmed":"Draft").replace(/>(Confirmed|Draft)</,">"+(ok?"Configured":"Not configured")+"<")}</div>
+   <div class="card-d" style="margin-top:6px">${d}</div>
+   <div style="font-size:12px;color:var(--text-2);margin-top:10px">Built and ready — awaiting provider credentials. Nothing is ever simulated for an unconfigured provider.</div></div>`).join("")}
+</div>`;
+
+/* =====================================================================
+   Portals
+   ===================================================================== */
+V.tenant = () => `
+<div class="anim-down" style="margin-bottom:18px"><div class="mini">Welcome back</div><h1>John</h1></div>
+<div class="alert a-danger anim-down" style="margin-bottom:14px"><span style="display:flex;gap:8px;align-items:flex-start"><span style="width:15px;height:15px;flex-shrink:0;margin-top:2px">${I.warn}</span><span>${QAR(9500)} is past its due date. If you've already paid, submit your transfer details below and we'll match it up.</span></span></div>
+
+<div class="card anim-up" style="margin-bottom:14px;padding:0">
+  <div class="card-h"><div class="card-t">My home</div><div class="card-d">The Pearl Residences · Unit 101</div></div>
+  <div class="card-b">
+    <p class="muted" style="font-size:13.5px;margin-bottom:12px">Porto Arabia, The Pearl, Doha</p>
+    <div class="grid g4">${[["Monthly rent",QAR(9500)],["Lease ends","31 Jan 2027"],["Paid to date",QAR(100700)],["Outstanding",QAR(13300)]].map(([l,v])=>
+      `<div style="border:1px solid var(--border);border-radius:9px;padding:11px"><div style="font-size:11.5px;color:var(--text-3)">${l}</div><div style="font-size:13.5px;font-weight:500;margin-top:2px;font-variant-numeric:tabular-nums">${v}</div></div>`).join("")}</div>
+  </div></div>
+
+<div class="card anim-up" style="margin-bottom:14px;padding:0">
+  <div class="card-h"><div class="card-t">Next payment</div><div class="card-d">${QAR(3800)} due 01 Jul 2026 · 48 days overdue</div></div>
+  <div class="card-b">
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px">${pillFor("Partial")}<span style="font-size:11.5px;color:var(--danger);font-weight:500">48 days overdue</span></div>
+    <div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);margin-bottom:8px">Transfer to</div>
+    <div class="grid g2" style="margin-bottom:14px">
+      ${[["Bank","Qatar National Bank"],["Account name","Pearl Property Management W.L.L."],["IBAN","QA58QNBA000000000123456789012"],["Payment reference","LEASE-0001"]].map(([l,v])=>
+        `<div style="border:1px solid var(--border);border-radius:9px;padding:9px 11px;display:flex;justify-content:space-between;align-items:center;gap:8px;cursor:pointer" onmouseover="this.style.background='#fafafa'" onmouseout="this.style.background=''">
+        <span style="min-width:0"><span style="display:block;font-size:11.5px;color:var(--text-3)">${l}</span><span style="display:block;font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${v}</span></span>
+        <svg style="width:14px;height:14px;flex-shrink:0;color:#a3a3a3" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></div>`).join("")}
+    </div>
+    <button class="btn" style="width:100%">Submit payment proof</button>
+    <div style="margin-top:10px;background:#fffbeb;color:#92400e;padding:9px 11px;border-radius:9px;font-size:12px">You have 1 payment awaiting verification.</div>
+  </div></div>
+
+<div class="card anim-up"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+  <div style="display:flex;gap:11px;align-items:center">
+    <div style="width:36px;height:36px;border-radius:50%;background:#fffbeb;display:grid;place-items:center"><span style="width:16px;height:16px;color:var(--warn)">${I.wrench}</span></div>
+    <div><div style="font-weight:500;font-size:13.5px">1 open repair</div><div class="mini">Report an issue or track progress</div></div></div>
+  <button class="btn out sm" onclick="go('tenant-maint')">View</button></div></div>`;
+
+V["tenant-pay"] = () => `
+<div class="anim-down" style="margin-bottom:18px"><h1>Payments</h1><div class="sub">Your rent schedule and everything you've paid.</div></div>
+<button class="btn" style="width:100%;margin-bottom:16px">Submit payment proof</button>
+<div class="card anim-up" style="padding:0;margin-bottom:14px">
+  <div class="card-h"><div class="card-t">Rent schedule</div><div class="card-d">${QAR(13300)} outstanding across 12 instalments.</div></div>
+  <div class="card-b"><div class="stagger">${SCHEDULE.map(s=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px solid var(--border-soft)">
+      <div><div style="font-weight:500;font-size:13.5px">${D(s.due)}</div><div class="mini">Instalment ${s.n} · ${QAR(s.amt)}</div></div>
+      <div style="text-align:right"><div style="font-size:13.5px;font-weight:500;font-variant-numeric:tabular-nums;color:${s.out?"var(--text)":"var(--text-3)"}">${s.out?QAR(s.out):"Paid"}</div><div style="margin-top:3px">${pillFor(s.status)}</div></div>
+    </div>`).join("")}</div></div></div>
+
+<div class="card anim-up" style="padding:0">
+  <div class="card-h"><div class="card-t">Payment history</div><div class="card-d">Including anything still being verified.</div></div>
+  <div class="card-b"><div class="stagger">${PAYMENTS.slice(0,5).map(p=>`
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-top:1px solid var(--border-soft)">
+      <div><div style="font-weight:500;font-variant-numeric:tabular-nums">${QAR(p.amt)}</div>
+      <div class="mini">${D(p.date)} · ${p.method}${p.ref!=="—"?" · "+p.ref:""}</div>
+      ${p.receipt?`<div class="mini" style="color:var(--success)">Receipt ${p.receipt}</div>`:""}
+      ${p.reason?`<div style="margin-top:5px;background:#fef2f2;color:#b91c1c;padding:6px 9px;border-radius:7px;font-size:11.5px;max-width:330px">${p.reason}</div>`:""}</div>
+      ${pillFor(p.status)}</div>`).join("")}</div></div></div>`;
+
+V["tenant-lease"] = () => `
+<div class="anim-down" style="margin-bottom:18px"><h1>Your lease</h1><div class="sub">LEASE-0001</div></div>
+<div class="card anim-up" style="margin-bottom:14px;border-color:#bae6fd;background:#f0f9ff40">
+  <div class="card-t">Renewal offer</div><div class="card-d" style="margin-bottom:12px">Your landlord would like to renew your tenancy.</div>
+  <div class="grid g3" style="margin-bottom:12px">
+  ${[["New term","01 Feb 2027 → 31 Jan 2028"],["New monthly rent",QAR(9900)],["New deposit","Unchanged"]].map(([l,v])=>
+    `<div style="border:1px solid #bae6fd;background:#fff;border-radius:9px;padding:11px"><div style="font-size:11.5px;color:var(--text-3)">${l}</div><div style="font-size:13px;font-weight:500;margin-top:2px">${v}</div></div>`).join("")}</div>
+  <p style="background:#fff;padding:11px;border-radius:9px;font-size:13.5px;color:var(--text-2);margin-bottom:12px">We'd be glad to renew your tenancy. The small increase reflects the building's new gym and pool access.</p>
+  <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn">Accept renewal</button><button class="btn out">Request a discussion</button><button class="btn ghost">Decline</button></div></div>
+
+<div class="card anim-up" style="padding:0"><div class="card-h"><div class="card-t">Tenancy details</div><div class="card-d">The Pearl Residences · Unit 101</div></div>
+<div class="card-b"><dl class="dl">
+  <div><dt>Status</dt><dd>${pillFor("Active")}</dd></div>
+  <div><dt>Start date</dt><dd>01 Feb 2026</dd></div><div><dt>End date</dt><dd>31 Jan 2027</dd></div>
+  <div><dt>Monthly rent</dt><dd>${QAR(9500)}</dd></div><div><dt>Security deposit</dt><dd>${QAR(9500)}</dd></div>
+  <div><dt>Payment frequency</dt><dd>Monthly</dd></div><div><dt>Payment method</dt><dd>Bank transfer</dd></div>
+</dl></div></div>`;
+
+V["tenant-maint"] = () => `
+<div class="anim-down" style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:18px">
+  <div><h1>Repairs</h1><div class="sub">Report an issue and follow its progress.</div></div>
+  <button class="btn">${I.plus} Report an issue</button></div>
+<div class="stagger" style="display:flex;flex-direction:column;gap:12px">
+${[MAINT[0],MAINT[3]].map(m=>`<div class="card">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:7px">
+    <b style="font-size:13.5px">${m.code}</b><span style="display:flex;gap:6px">${pillFor(m.pri)}${pillFor(m.status)}</span></div>
+  <p style="font-size:13.5px;color:var(--text-2)">${m.desc}</p>
+  <div class="mini" style="margin-top:6px">Reported ${m.age} days ago · ${m.cat}</div>
+  ${m.status==="Assigned"?`<div style="margin-top:9px;background:#fafafa;padding:10px;border-radius:9px;font-size:13px;color:var(--text-2)"><b style="color:var(--text)">Latest update:</b> Technician booked for Wednesday afternoon. Rashid Cooling Services will call before arriving.</div>`:""}
+</div>`).join("")}</div>`;
+
+V.owner = () => `
+<div class="anim-down" style="margin-bottom:18px"><div class="mini">Portfolio overview</div><h1>Jassim Al-Thani</h1></div>
+<div class="grid g4 stagger" style="margin-bottom:14px">
+  ${stat("Properties","1",{icon:I.build})}${stat("Units","16",{sub:"3 vacant",icon:I.home})}
+  ${stat("Occupancy","75%",{pct:75,tone:"warn"})}${stat("Open repairs","2",{tone:"warn"})}</div>
+
+<div class="card anim-up" style="padding:0;margin-bottom:14px">
+  <div class="card-h"><div class="card-t">Money this month</div><div class="card-d">August 2026 · rent settled against instalments due in the period.</div></div>
+  <div class="card-b">
+    <div class="grid g2" style="margin-bottom:12px">
+      ${[["Rent received",QAR(96200),"var(--success)"],["Still outstanding",QAR(22300),"var(--warn)"],["Expenses","−"+QAR(4250),""],["Management fees","−"+QAR(9480),""]].map(([l,v,c])=>
+      `<div style="display:flex;justify-content:space-between;align-items:center;border:1px solid var(--border);border-radius:9px;padding:11px 13px">
+       <span style="font-size:13.5px;color:var(--text-2)">${l}</span><span style="font-size:13.5px;font-weight:500;font-variant-numeric:tabular-nums;color:${c||"var(--text)"}">${v}</span></div>`).join("")}
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;background:#171717;color:#fff;padding:13px 16px;border-radius:10px">
+      <span style="display:flex;gap:8px;align-items:center;font-weight:500;font-size:13.5px"><span style="width:16px;height:16px">${I.wallet}</span>Net to you</span>
+      <b style="font-size:18px;font-variant-numeric:tabular-nums">${QAR(82470)}</b></div>
+    <div class="mini" style="margin-top:9px">This is a live view. Your finalised statement for the period is the definitive record.</div>
+  </div></div>
+
+<div class="card anim-up" style="padding:0"><div class="card-h"><div class="card-t">Your properties</div></div>
+<div class="card-b"><div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-top:1px solid var(--border-soft)">
+  <div><div style="font-weight:500;font-size:13.5px">The Pearl Residences</div><div class="mini">Porto Arabia, The Pearl, Doha</div></div>
+  <div style="text-align:right"><div style="font-variant-numeric:tabular-nums;font-size:13.5px">12/16</div><div class="mini">occupied</div></div></div></div></div>`;
+
+V["owner-fin"] = () => `
+<div class="anim-down" style="margin-bottom:18px"><h1>Financials</h1><div class="sub">Income, costs and what's owed to you.</div></div>
+<div class="card anim-up" style="padding:0;margin-bottom:14px"><div class="card-h"><div class="card-t">This month</div><div class="card-d">Live figures — the finalised statement is the definitive record.</div></div>
+<div class="card-b"><dl class="dl">
+  <div><dt>Rent received</dt><dd>${QAR(96200)}</dd></div><div><dt>Outstanding rent</dt><dd>${QAR(22300)}</dd></div>
+  <div><dt>Expenses</dt><dd>−${QAR(4250)}</dd></div><div><dt>Management fees</dt><dd>−${QAR(9480)}</dd></div>
+  <div style="font-weight:600"><dt style="color:var(--text)">Net to you</dt><dd>${QAR(82470)}</dd></div></dl></div></div>
+
+<div class="card anim-up" style="padding:0"><div class="card-h"><div class="card-t">Transaction history</div><div class="card-d">Every movement recorded against your account.</div></div>
+<div class="card-b"><div class="stagger">
+${[["Rent income","10 Aug 2026","The Pearl Residences",96200],["Management fee","01 Aug 2026","The Pearl Residences",-9480],
+  ["Maintenance","08 Aug 2026","AC compressor — Unit 101",-2400],["Expense","10 Aug 2026","Common area electricity",-1850],
+  ["Payout","31 Jul 2026","Monthly payout transferred",-102570],["Rent income","10 Jul 2026","The Pearl Residences",118500]].map(([t,d,n,a])=>
+`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px solid var(--border-soft)">
+  <div><div style="font-size:13.5px">${t}</div><div class="mini">${d} · ${n}</div></div>
+  <span style="font-weight:500;font-variant-numeric:tabular-nums;color:${a>=0?"var(--success)":"var(--text)"}">${a>=0?QAR(a):"−"+QAR(Math.abs(a))}</span></div>`).join("")}
+</div></div></div>`;
+
+V["owner-stmt"] = () => `
+<div class="anim-down" style="margin-bottom:18px"><h1>Statements</h1><div class="sub">Monthly statements become immutable once finalised. Revisions are issued as a new version.</div></div>
+<div class="stagger" style="display:flex;flex-direction:column;gap:12px">
+${STATEMENTS.filter(s=>s.owner==="Jassim Al-Thani").map(s=>`
+<div class="card" style="padding:0"><div class="card-h">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+    <div class="card-t">${D(s.from)} – ${D(s.to)}</div>
+    <span style="display:flex;gap:6px">${s.v>1?`<span class="pill p-info">v${s.v}</span>`:""}${pillFor(s.status)}</span></div>
+  <div class="card-d">Payout ${QAR(s.payout)}</div></div>
+<div class="card-b"><dl class="dl">
+  <div><dt>Opening balance</dt><dd>${QAR(s.open)}</dd></div>
+  <div><dt>Rent received</dt><dd>${QAR(s.rent)}</dd></div>
+  <div><dt>Expenses</dt><dd>−${QAR(s.exp)}</dd></div>
+  <div><dt>Maintenance</dt><dd>−${QAR(s.maint)}</dd></div>
+  <div><dt>Management fees</dt><dd>−${QAR(s.fee)}</dd></div>
+  <div style="font-weight:600"><dt style="color:var(--text)">Closing balance</dt><dd>${QAR(s.close)}</dd></div>
+</dl>${s.status==="Finalised"?`<button class="btn out sm" style="margin-top:10px">${I.up} Download PDF</button>`:""}</div></div>`).join("")}
+</div>`;
+
+V.vendor = () => `
+<div class="anim-down" style="margin-bottom:18px"><h1>Your jobs</h1><div class="sub">2 open jobs.</div></div>
+<div class="grid g3 stagger" style="margin-bottom:16px">
+  ${[["New",1],["Scheduled",1],["In progress",0]].map(([l,v])=>
+    `<div class="card" style="text-align:center;padding:13px"><div style="font-size:20px;font-weight:600;font-variant-numeric:tabular-nums">${v}</div><div class="mini">${l}</div></div>`).join("")}</div>
+
+<div class="stagger" style="display:flex;flex-direction:column;gap:12px">
+<div class="card" style="padding:0"><div class="card-h">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+    <div class="card-t">MR-0001</div><span style="display:flex;gap:6px">${pillFor("High")}${pillFor("Assigned")}</span></div>
+  <div class="card-d" style="display:flex;gap:5px;align-items:center"><span style="width:13px;height:13px">${I.pin}</span>The Pearl Residences · Unit 101</div></div>
+<div class="card-b">
+  <p style="font-size:13.5px;line-height:1.6;margin-bottom:10px">AC unit in the living room is running but blowing warm air. Started two days ago, gets worse in the afternoon.</p>
+  <div style="background:#fafafa;padding:10px;border-radius:9px;font-size:12.5px;color:var(--text-2);margin-bottom:8px"><b style="color:var(--text)">Access:</b> Please call before arriving. Tenant home after 4pm weekdays.</div>
+  <div style="background:#fafafa;padding:10px;border-radius:9px;font-size:12.5px;color:var(--text-2);margin-bottom:12px"><b style="color:var(--text)">Instructions:</b> Check compressor and gas levels. Approved spend cap ${QAR(500)}.</div>
+  <div style="display:flex;gap:20px;font-size:11.5px;margin-bottom:14px">
+    <div><div class="muted">Scheduled</div><b>19 Aug, 16:00</b></div>
+    <div><div class="muted">Approved cap</div><b>${QAR(500)}</b></div></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button class="btn" style="flex:1;min-width:130px">${I.check} Accept job</button>
+    <button class="btn out" style="flex:1;min-width:120px">Schedule</button>
+    <button class="btn ghost">Decline</button></div>
+</div></div>
+
+<div class="card" style="padding:0"><div class="card-h">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+    <div class="card-t">MR-0005</div><span style="display:flex;gap:6px">${pillFor("Low")}${pillFor("Scheduled")}</span></div>
+  <div class="card-d" style="display:flex;gap:5px;align-items:center"><span style="width:13px;height:13px">${I.pin}</span>Al Waab Villa Compound · Villa 2</div></div>
+<div class="card-b">
+  <p style="font-size:13.5px;line-height:1.6;margin-bottom:12px">Bathroom extractor fan is very noisy.</p>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button class="btn out" style="flex:1;min-width:130px">${I.pin} Mark arrived</button>
+    <button class="btn" style="flex:1;min-width:130px">Work started</button></div>
+</div></div>
+</div>`;
+
+V["vendor-done"] = () => `
+<div class="anim-down" style="margin-bottom:18px"><h1>Completed work</h1><div class="sub">7 jobs · ${QAR(4820)} billed</div></div>
+<div class="stagger" style="display:flex;flex-direction:column;gap:10px">
+${[["MR-0004","Lusail Marina View · 502",680,"12 Aug 2026"],["MR-0009","West Bay Towers · 301",1250,"05 Aug 2026"],
+  ["MR-0011","The Pearl Residences · 203",340,"28 Jul 2026"],["MR-0014","Al Sadd Business Center · Office 2",890,"21 Jul 2026"],
+  ["MR-0017","The Pearl Residences · 102",1660,"14 Jul 2026"]].map(([c,l,a,d])=>
+`<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+  <div><div style="font-weight:500;font-size:13.5px">${c}</div><div class="mini">${l}</div><div class="mini">${d}</div></div>
+  <div style="text-align:right"><div style="font-weight:500;font-variant-numeric:tabular-nums">${QAR(a)}</div><div style="margin-top:3px">${pillFor("Completed")}</div></div>
+</div></div>`).join("")}</div>`;
+
+V.admin = () => `
+<div class="head anim-down"><div><h1>Platform overview</h1><div class="sub">Every organisation on RentOS, aggregated.</div></div></div>
+<div class="sechead">Accounts</div>
+<div class="grid g4 stagger">
+  ${stat("Organisations","5",{icon:I.build})}${stat("Active","3",{tone:"success"})}
+  ${stat("Trials","1",{tone:"warn"})}${stat("Users","23",{sub:"1 suspended org",icon:I.users})}</div>
+<div class="sechead">Under management</div>
+<div class="grid g5 stagger">
+  ${stat("Properties","31",{icon:I.build})}${stat("Units","325",{sub:"71% occupied",pct:71,icon:I.home})}
+  ${stat("Active leases","261",{})}${stat("Monthly rent",QAR(2184000),{sub:"All organisations",icon:I.chart})}
+  ${stat("Collection rate","86%",{pct:86,tone:"success"})}</div>
+<div style="display:grid;grid-template-columns:1fr 320px;gap:16px;margin-top:22px" class="respcols">
+  <div class="card" style="padding:0"><div class="card-h"><div class="card-t" style="display:flex;gap:7px;align-items:center"><span style="width:15px;height:15px;color:#a3a3a3">${I.act}</span>Recent platform activity</div>
+  <div class="card-d">The most recent audited operations across all organisations.</div></div>
+  <div class="card-b">${AUDIT.slice(0,7).map(a=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-top:1px solid var(--border-soft)">
+      <div style="min-width:0"><div style="font-size:13.5px;text-transform:capitalize">${a.act.replace(/[._]/g," ")}</div><div class="mini">${a.org} · ${a.actor}</div></div>
+      <span class="mini" style="flex-shrink:0">${DT(a.at)}</span></div>`).join("")}</div></div>
+  <div class="card"><div class="card-t" style="margin-bottom:10px">Operations</div>
+    <div style="display:flex;justify-content:space-between;border:1px solid var(--border);border-radius:9px;padding:11px;font-size:13.5px;margin-bottom:8px"><span class="muted">Open maintenance</span><b>34</b></div>
+    <div style="border:1px solid var(--border);border-radius:9px;padding:11px;font-size:13.5px;cursor:pointer" onclick="go('admin-orgs')">Manage organisations →</div>
+    <div style="border:1px solid var(--border);border-radius:9px;padding:11px;font-size:13.5px;margin-top:8px;cursor:pointer" onclick="go('admin-audit')">Full audit log →</div></div>
+</div>`;
+
+V["admin-orgs"] = () => `
+<div class="head anim-down"><div><h1>Organisations</h1><div class="sub">Every property-management company on the platform.</div></div></div>
+<div class="toolbar"><input class="inp" style="width:280px" placeholder="Search name, slug or email…"></div>
+${table([{t:"Organisation"},{t:"Plan"},{t:"Members",r:1},{t:"Units",r:1},{t:"Leases",r:1},{t:"Created"},{t:"Status"}],
+  ORGS.map(o=>`<tr>
+    <td><span class="link">${o.name}</span><div class="mini">${o.email}</div>${o.onb!=="complete"?`<span class="pill p-warn" style="margin-top:4px">Onboarding: ${o.onb}</span>`:""}</td>
+    <td class="muted">${o.plan}</td><td class="num">${o.members}</td><td class="num">${o.units}</td><td class="num">${o.leases}</td>
+    <td class="muted">${D(o.created)}</td>
+    <td><div style="display:flex;gap:8px;align-items:center">${pillFor(o.status)}<select class="inp" style="height:30px;font-size:12px;width:110px"><option>${o.status}</option><option>Trial</option><option>Active</option><option>Suspended</option></select></div></td></tr>`).join(""))}`;
+
+V["admin-audit"] = () => `
+<div class="head anim-down"><div><h1>Audit log</h1><div class="sub">Critical operations across every organisation: who did what, to which record, and when.</div></div></div>
+<div class="toolbar"><input class="inp" style="width:280px" placeholder="Search action or entity…"></div>
+${table([{t:"When"},{t:"Organisation"},{t:"Actor"},{t:"Action"},{t:"Entity"}],
+  AUDIT.map(a=>`<tr><td class="muted" style="white-space:nowrap">${DT(a.at)}</td>
+  <td>${a.org}</td><td class="muted">${a.actor}</td>
+  <td><b>${a.act}</b></td><td class="muted">${a.ent}</td></tr>`).join(""))}`;
+
+V["admin-plans"] = () => `
+<div class="head anim-down"><div><h1>Plans</h1><div class="sub">Subscription tiers and the limits they impose.</div></div></div>
+<div class="grid g3 stagger">
+${[["Trial","Free",25,3,"500 MB",[]],["Starter",QAR(499),50,5,"2 GB",["online payments"]],
+  ["Growth",QAR(1499),200,15,"10 GB",["online payments","whatsapp","advanced reporting"]],
+  ["Professional",QAR(3999),750,40,"50 GB",["online payments","whatsapp","advanced reporting"]],
+  ["Enterprise","Custom","Unlimited","Unlimited","Unlimited",["online payments","whatsapp","advanced reporting","white label"]]].map(([n,p,u,us,st,f])=>
+`<div class="card"><div class="card-t" style="display:flex;gap:7px;align-items:center"><span style="width:15px;height:15px;color:#a3a3a3">${I.card}</span>${n}</div>
+<div class="card-d" style="margin-top:3px">${p==="Free"||p==="Custom"?p:p+" / month"}</div>
+<dl class="dl" style="margin-top:10px"><div><dt>Max units</dt><dd>${u}</dd></div><div><dt>Max users</dt><dd>${us}</dd></div><div><dt>Storage</dt><dd>${st}</dd></div></dl>
+<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:4px">${f.map(x=>`<span class="pill p-outline">${x}</span>`).join("")||'<span class="mini">Core features only</span>'}</div></div>`).join("")}
+</div>`;
+
+/* =====================================================================
+   Shell + router
+   ===================================================================== */
+const MANAGER_NAV = [
+  ["dashboard","Dashboard",I.dash],["properties","Properties",I.build],["owners","Owners",I.user],
+  ["tenants","Tenants",I.users],["leases","Leases",I.file],["finance","Finance",I.wallet],
+  ["cheques","Cheques",I.bank],["maintenance","Maintenance",I.wrench],["reports","Reports",I.chart],
+  ["settings","Settings",I.cog],
+];
+const ADMIN_NAV = [["admin","Overview",I.dash],["admin-orgs","Organisations",I.build],["admin-plans","Plans",I.card],["admin-audit","Audit",I.act]];
+const TENANT_NAV = [["tenant","Home",I.home],["tenant-pay","Payments",I.receipt],["tenant-lease","Lease",I.file],["tenant-maint","Repairs",I.wrench]];
+const OWNER_NAV = [["owner","Overview",I.dash],["owner-fin","Financials",I.wallet],["owner-stmt","Statements",I.file]];
+const VENDOR_NAV = [["vendor","Jobs",I.brief],["vendor-done","Completed",I.clip]];
+
+const ROUTE_GROUP = r => {
+  if(r.startsWith("admin")) return "admin";
+  if(r.startsWith("tenant")) return "tenant";
+  if(r.startsWith("owner")&&r!=="owners"&&r!=="owner-detail") return "owner";
+  if(r.startsWith("vendor")) return "vendor";
+  return "manager";
+};
+
+function shellManager(route,dark){
+  const nav = dark?ADMIN_NAV:MANAGER_NAV;
+  const who = dark?["RentOS Platform Admin","RA"]:["Fatima Al-Sulaiti","FA"];
+  return `<div class="app">
+    <aside class="sidebar${dark?" dark":""}">
+      <div class="brand"><div class="logo">R</div><div><div class="brand-name">RentOS</div>${dark?'<div class="brand-sub">Platform admin</div>':''}</div></div>
+      ${dark?"":'<div class="orgpick"><span>Pearl Property Management</span><svg style="width:13px;height:13px;color:#a3a3a3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M7 9l5-5 5 5M7 15l5 5 5-5"/></svg></div>'}
+      <nav class="nav">${nav.map(([r,l,ic])=>`<a class="${r===route?"on":""}" onclick="go('${r}')">${ic}${l}</a>`).join("")}</nav>
+      <div class="sidefoot">${who[0]}</div>
+    </aside>
+    <div class="main">
+      <header class="topbar">
+        <div class="search">${I.search}<span style="flex:1">Search tenants, units, leases…</span><kbd>⌘K</kbd></div>
+        <div style="margin-left:auto;display:flex;gap:10px;align-items:center">
+          <button class="btn out sm">${I.plus} New lease</button>
+          <div style="position:relative;width:32px;height:32px;display:grid;place-items:center;color:var(--text-2)"><span style="width:17px;height:17px">${I.bell}</span>
+          <span style="position:absolute;top:3px;right:3px;background:#ef4444;color:#fff;font-size:9px;font-weight:600;border-radius:99px;min-width:15px;height:15px;display:grid;place-items:center;padding:0 3px">3</span></div>
+          <div class="avatar">${who[1]}</div>
+        </div>
+      </header>
+      <div class="content"><div class="wrap" id="view"></div></div>
+    </div></div>`;
+}
+
+function shellPortal(route,nav,name,initials){
+  return `<div class="portal">
+    <header class="pbar"><div class="pbar-in">
+      <div class="logo">R</div>
+      <div style="min-width:0"><div style="font-weight:600;font-size:13.5px">Pearl Property Management</div></div>
+      <nav class="pnav">${nav.map(([r,l])=>`<a class="${r===route?"on":""}" onclick="go('${r}')">${l}</a>`).join("")}</nav>
+      <div class="avatar" style="width:30px;height:30px">${initials}</div>
+    </div></header>
+    <main class="pmain" id="view"></main>
+    <nav class="pbottom">${nav.map(([r,l,ic])=>`<a class="${r===route?"on":""}" onclick="go('${r}')">${ic}${l}</a>`).join("")}</nav>
+  </div>`;
+}
+
+function render(){
+  const route = location.hash.slice(1) || "dashboard";
+  const group = ROUTE_GROUP(route);
+  const root = document.getElementById("root");
+
+  if(group==="manager") root.innerHTML = shellManager(route,false);
+  else if(group==="admin") root.innerHTML = shellManager(route,true);
+  else if(group==="tenant") root.innerHTML = shellPortal(route,TENANT_NAV,"John Smith","JS");
+  else if(group==="owner") root.innerHTML = shellPortal(route,OWNER_NAV,"Jassim Al-Thani","JA");
+  else root.innerHTML = shellPortal(route,VENDOR_NAV,"Rashid Cooling","RC");
+
+  const view = document.getElementById("view");
+  view.innerHTML = (V[route]||V.dashboard)();
+  view.scrollTop = 0;
+  const c = document.querySelector(".content"); if(c) c.scrollTop = 0;
+  renderSwitcher(route);
+}
+
+function renderSwitcher(route){
+  const g = ROUTE_GROUP(route);
+  document.getElementById("switcher").innerHTML =
+    `<b>Switch portal — this is what each role sees</b>` +
+    [["dashboard","Manager","manager"],["tenant","Tenant","tenant"],["owner","Owner","owner"],
+     ["vendor","Vendor","vendor"],["admin","Platform admin","admin"]]
+    .map(([r,l,gg])=>`<a class="${g===gg?"on":""}" onclick="go('${r}')">${l}</a>`).join("");
+}
+
+window.go = r => { location.hash = r; };
+window.addEventListener("hashchange", render);
+render();
+</script>
+</body>
+</html>

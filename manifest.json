@@ -1,0 +1,662 @@
+[
+ {
+  "path": "demo/p1.txt",
+  "lines": 259,
+  "bytes": 18395,
+  "from": "2026-08-20-10-54-55-rentos-saas-build-and-demo-session.txt"
+ },
+ {
+  "path": "demo/p2.js",
+  "lines": 230,
+  "bytes": 31037,
+  "from": "2026-08-20-10-54-55-rentos-saas-build-and-demo-session.txt"
+ },
+ {
+  "path": "demo/p3.js",
+  "lines": 351,
+  "bytes": 38627,
+  "from": "2026-08-20-10-54-55-rentos-saas-build-and-demo-session.txt"
+ },
+ {
+  "path": "demo/p4.js",
+  "lines": 355,
+  "bytes": 38181,
+  "from": "2026-08-20-10-54-55-rentos-saas-build-and-demo-session.txt"
+ },
+ {
+  "path": "demo/p5.js",
+  "lines": 354,
+  "bytes": 38612,
+  "from": "2026-08-20-10-54-55-rentos-saas-build-and-demo-session.txt"
+ },
+ {
+  "path": "demo/p6.js",
+  "lines": 319,
+  "bytes": 33101,
+  "from": "2026-08-20-10-54-55-rentos-saas-build-and-demo-session.txt"
+ },
+ {
+  "path": "demo/part1.css",
+  "lines": 1,
+  "bytes": 18,
+  "from": "2026-08-20-10-54-55-rentos-saas-build-and-demo-session.txt"
+ },
+ {
+  "path": "demo/rentos-demo.html",
+  "lines": 1224,
+  "bytes": 103120,
+  "from": "2026-08-20-10-54-55-rentos-saas-build-and-demo-session.txt"
+ },
+ {
+  "path": "DEPLOY.md",
+  "lines": 221,
+  "bytes": 7804,
+  "from": "2026-08-20-10-54-55-rentos-saas-build-and-demo-session.txt"
+ },
+ {
+  "path": "QUICKSTART.md",
+  "lines": 166,
+  "bytes": 5411,
+  "from": "2026-08-20-10-54-55-rentos-saas-build-and-demo-session.txt"
+ },
+ {
+  "path": "README.md",
+  "lines": 421,
+  "bytes": 17308,
+  "from": "2026-08-20-10-54-55-rentos-saas-build-and-demo-session.txt"
+ },
+ {
+  "path": "app/(app)/leases/[id]/page.tsx",
+  "lines": 270,
+  "bytes": 12821,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "app/(app)/settings/page.tsx",
+  "lines": 297,
+  "bytes": 13415,
+  "from": "2026-08-20-10-54-55-rentos-saas-build-and-demo-session.txt"
+ },
+ {
+  "path": "app/(auth)/forgot-password/page.tsx",
+  "lines": 48,
+  "bytes": 1990,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "app/(auth)/invite/[token]/page.tsx",
+  "lines": 48,
+  "bytes": 2271,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "app/(auth)/layout.tsx",
+  "lines": 17,
+  "bytes": 644,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "app/(auth)/reset-password/page.tsx",
+  "lines": 41,
+  "bytes": 1822,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "app/(auth)/sign-in/page.tsx",
+  "lines": 51,
+  "bytes": 2101,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "app/layout.tsx",
+  "lines": 23,
+  "bytes": 728,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "app/setup/page.tsx",
+  "lines": 146,
+  "bytes": 6184,
+  "from": "2026-08-20-10-54-55-rentos-saas-build-and-demo-session.txt"
+ },
+ {
+  "path": "components/layout/mobile-nav.tsx",
+  "lines": 39,
+  "bytes": 1337,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "components/layout/sidebar.tsx",
+  "lines": 62,
+  "bytes": 2564,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "components/layout/topbar.tsx",
+  "lines": 38,
+  "bytes": 1595,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "components/shared/confirm-dialog.tsx",
+  "lines": 72,
+  "bytes": 2069,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "components/shared/empty-state.tsx",
+  "lines": 34,
+  "bytes": 955,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "components/shared/field.tsx",
+  "lines": 58,
+  "bytes": 1373,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "components/shared/status-badge.tsx",
+  "lines": 62,
+  "bytes": 2944,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "components/ui/button.tsx",
+  "lines": 55,
+  "bytes": 1969,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "features/admin/actions.ts",
+  "lines": 167,
+  "bytes": 5568,
+  "from": "2026-08-20-10-54-55-rentos-saas-build-and-demo-session.txt"
+ },
+ {
+  "path": "features/admin/components/admin-controls.tsx",
+  "lines": 94,
+  "bytes": 2532,
+  "from": "2026-08-20-10-54-55-rentos-saas-build-and-demo-session.txt"
+ },
+ {
+  "path": "features/admin/queries.ts",
+  "lines": 261,
+  "bytes": 10632,
+  "from": "2026-08-20-10-54-55-rentos-saas-build-and-demo-session.txt"
+ },
+ {
+  "path": "features/auth/actions.ts",
+  "lines": 147,
+  "bytes": 5278,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "features/dashboard/components/charts.tsx",
+  "lines": 83,
+  "bytes": 3360,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "features/dashboard/queries.ts",
+  "lines": 169,
+  "bytes": 7630,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "features/finance/actions.ts",
+  "lines": 290,
+  "bytes": 10345,
+  "from": "2026-08-20-10-54-55-rentos-saas-build-and-demo-session.txt"
+ },
+ {
+  "path": "features/finance/components/finance-controls.tsx",
+  "lines": 229,
+  "bytes": 8782,
+  "from": "2026-08-20-10-54-55-rentos-saas-build-and-demo-session.txt"
+ },
+ {
+  "path": "features/finance/queries.ts",
+  "lines": 324,
+  "bytes": 11160,
+  "from": "2026-08-20-10-54-55-rentos-saas-build-and-demo-session.txt"
+ },
+ {
+  "path": "features/import/actions.ts",
+  "lines": 171,
+  "bytes": 6090,
+  "from": "2026-08-20-10-54-55-rentos-saas-build-and-demo-session.txt"
+ },
+ {
+  "path": "features/import/components/import-wizard.tsx",
+  "lines": 337,
+  "bytes": 13670,
+  "from": "2026-08-20-10-54-55-rentos-saas-build-and-demo-session.txt"
+ },
+ {
+  "path": "features/import/csv.ts",
+  "lines": 257,
+  "bytes": 10041,
+  "from": "2026-08-20-10-54-55-rentos-saas-build-and-demo-session.txt"
+ },
+ {
+  "path": "features/leases/actions.ts",
+  "lines": 435,
+  "bytes": 16009,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "features/leases/components/lease-actions.tsx",
+  "lines": 174,
+  "bytes": 6499,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "features/leases/components/lease-wizard.tsx",
+  "lines": 360,
+  "bytes": 16180,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "features/leases/queries.ts",
+  "lines": 303,
+  "bytes": 10940,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "features/maintenance/actions.ts",
+  "lines": 383,
+  "bytes": 14008,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "features/maintenance/components/maintenance-controls.tsx",
+  "lines": 200,
+  "bytes": 7456,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "features/maintenance/components/vendor-job-card.tsx",
+  "lines": 314,
+  "bytes": 11828,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "features/maintenance/queries.ts",
+  "lines": 317,
+  "bytes": 11577,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "features/notifications/components/notification-bell.tsx",
+  "lines": 134,
+  "bytes": 5186,
+  "from": "2026-08-20-10-54-55-rentos-saas-build-and-demo-session.txt"
+ },
+ {
+  "path": "features/notifications/service.ts",
+  "lines": 95,
+  "bytes": 3032,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "features/organisations/components/onboarding-flow.tsx",
+  "lines": 249,
+  "bytes": 9888,
+  "from": "2026-08-20-10-54-55-rentos-saas-build-and-demo-session.txt"
+ },
+ {
+  "path": "features/owners/actions.ts",
+  "lines": 189,
+  "bytes": 7003,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "features/owners/queries.ts",
+  "lines": 258,
+  "bytes": 8469,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "features/payments/actions-cheques.ts",
+  "lines": 217,
+  "bytes": 8229,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "features/payments/actions.ts",
+  "lines": 335,
+  "bytes": 12079,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "features/payments/allocation.ts",
+  "lines": 130,
+  "bytes": 4358,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "features/payments/components/cheque-status-actions.tsx",
+  "lines": 121,
+  "bytes": 4616,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "features/payments/components/payment-verification-actions.tsx",
+  "lines": 90,
+  "bytes": 3288,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "features/payments/components/record-payment-dialog.tsx",
+  "lines": 226,
+  "bytes": 9682,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "features/payments/queries.ts",
+  "lines": 316,
+  "bytes": 10687,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "features/portals/components/tenant-components.tsx",
+  "lines": 292,
+  "bytes": 11311,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "features/portals/owner-queries.ts",
+  "lines": 215,
+  "bytes": 7762,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "features/portals/tenant-queries.ts",
+  "lines": 338,
+  "bytes": 11292,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "features/properties/actions.ts",
+  "lines": 224,
+  "bytes": 7642,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "features/properties/components/property-form.tsx",
+  "lines": 145,
+  "bytes": 6253,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "features/properties/components/unit-form-dialog.tsx",
+  "lines": 133,
+  "bytes": 5736,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "features/properties/queries.ts",
+  "lines": 233,
+  "bytes": 7610,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "features/reports/queries.ts",
+  "lines": 258,
+  "bytes": 9027,
+  "from": "2026-08-20-10-54-55-rentos-saas-build-and-demo-session.txt"
+ },
+ {
+  "path": "features/search/actions.ts",
+  "lines": 181,
+  "bytes": 6189,
+  "from": "2026-08-20-10-54-55-rentos-saas-build-and-demo-session.txt"
+ },
+ {
+  "path": "features/search/components/command-menu.tsx",
+  "lines": 231,
+  "bytes": 8978,
+  "from": "2026-08-20-10-54-55-rentos-saas-build-and-demo-session.txt"
+ },
+ {
+  "path": "features/settings/actions.ts",
+  "lines": 194,
+  "bytes": 6989,
+  "from": "2026-08-20-10-54-55-rentos-saas-build-and-demo-session.txt"
+ },
+ {
+  "path": "features/settings/components/settings-forms.tsx",
+  "lines": 240,
+  "bytes": 9946,
+  "from": "2026-08-20-10-54-55-rentos-saas-build-and-demo-session.txt"
+ },
+ {
+  "path": "features/settings/queries.ts",
+  "lines": 110,
+  "bytes": 4350,
+  "from": "2026-08-20-10-54-55-rentos-saas-build-and-demo-session.txt"
+ },
+ {
+  "path": "lib/config/app.ts",
+  "lines": 30,
+  "bytes": 981,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "lib/config/env.ts",
+  "lines": 66,
+  "bytes": 2228,
+  "from": "2026-08-20-10-54-55-rentos-saas-build-and-demo-session.txt"
+ },
+ {
+  "path": "lib/permissions/context.ts",
+  "lines": 116,
+  "bytes": 4052,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "lib/permissions/guards.ts",
+  "lines": 100,
+  "bytes": 3307,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "lib/supabase/client.ts",
+  "lines": 14,
+  "bytes": 457,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "lib/supabase/middleware.ts",
+  "lines": 50,
+  "bytes": 1690,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "lib/supabase/server.ts",
+  "lines": 55,
+  "bytes": 1927,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "lib/utils/audit.ts",
+  "lines": 27,
+  "bytes": 887,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "lib/utils/cn.ts",
+  "lines": 6,
+  "bytes": 169,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "lib/utils/form-state.ts",
+  "lines": 71,
+  "bytes": 2643,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "lib/utils/format.ts",
+  "lines": 35,
+  "bytes": 1317,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "lib/validation/auth.ts",
+  "lines": 35,
+  "bytes": 1384,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "lib/validation/entities.ts",
+  "lines": 117,
+  "bytes": 4801,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "lib/validation/leases.ts",
+  "lines": 150,
+  "bytes": 5366,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "lib/validation/maintenance.ts",
+  "lines": 91,
+  "bytes": 3237,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "middleware.ts",
+  "lines": 12,
+  "bytes": 335,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "supabase/migrations/0001_extensions_and_helpers.sql",
+  "lines": 85,
+  "bytes": 3046,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "supabase/migrations/0002_identity.sql",
+  "lines": 172,
+  "bytes": 7071,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "supabase/migrations/0003_subscriptions.sql",
+  "lines": 42,
+  "bytes": 2014,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "supabase/migrations/0004_owners.sql",
+  "lines": 52,
+  "bytes": 2087,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "supabase/migrations/0005_properties.sql",
+  "lines": 98,
+  "bytes": 4183,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "supabase/migrations/0006_tenants.sql",
+  "lines": 62,
+  "bytes": 2340,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "supabase/migrations/0007_leases.sql",
+  "lines": 126,
+  "bytes": 5221,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "supabase/migrations/0008_rent.sql",
+  "lines": 146,
+  "bytes": 6077,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "supabase/migrations/0009_payments.sql",
+  "lines": 141,
+  "bytes": 5807,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "supabase/migrations/0010_cheques.sql",
+  "lines": 127,
+  "bytes": 5305,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "supabase/migrations/0011_maintenance.sql",
+  "lines": 76,
+  "bytes": 3554,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "supabase/migrations/0012_vendors.sql",
+  "lines": 80,
+  "bytes": 3254,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "supabase/migrations/0013_finance.sql",
+  "lines": 106,
+  "bytes": 5060,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "supabase/migrations/0014_communication_documents_audit_system.sql",
+  "lines": 154,
+  "bytes": 6832,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "supabase/migrations/0015_row_level_security.sql",
+  "lines": 565,
+  "bytes": 38998,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "supabase/migrations/0016_storage.sql",
+  "lines": 36,
+  "bytes": 1722,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "supabase/migrations/0017_reference_data.sql",
+  "lines": 129,
+  "bytes": 8059,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "supabase/seed/demo_seed.sql",
+  "lines": 303,
+  "bytes": 19604,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "tests/allocation.test.ts",
+  "lines": 133,
+  "bytes": 4492,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "tests/business-rules.test.ts",
+  "lines": 271,
+  "bytes": 10242,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ },
+ {
+  "path": "types/database.ts",
+  "lines": 719,
+  "bytes": 35661,
+  "from": "2026-08-19-11-52-53-rentos-saas-build-session.txt"
+ }
+]
