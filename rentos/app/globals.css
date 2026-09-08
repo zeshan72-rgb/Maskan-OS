@@ -1,0 +1,14 @@
+/* NOT RECOVERED FROM THE TRANSCRIPTS.
+   app/layout.tsx imports "./globals.css", so the build fails without it.
+   This is a minimal Tailwind entry point, not the original file. If the
+   original had custom properties, base styles or brand tokens, they are
+   lost and this will render plainer than intended. */
+@import "tailwindcss";
+
+:root {
+  --font-inter: "Inter", system-ui, sans-serif;
+}
+
+body {
+  font-family: var(--font-inter);
+}
