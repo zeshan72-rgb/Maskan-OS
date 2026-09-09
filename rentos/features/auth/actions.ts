@@ -1,6 +1,8 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { getSessionContext } from "@/lib/permissions/context";
+import { landingPathFor } from "@/lib/permissions/guards";
 import { revalidatePath } from "next/cache";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import {
@@ -27,7 +29,9 @@ export async function signInAction(_prev: ActionResult, formData: FormData): Pro
     return { error: "Incorrect email or password. Please try again." };
   }
 
-  redirect("/dashboard");
+  // Route by role, not to a fixed path. A tenant, owner or vendor must not
+  // land in the manager application; landingPathFor decides where they go.
+  redirect(landingPathFor(await requireContext()));
 }
 
 export async function signOutAction() {
@@ -67,7 +71,7 @@ export async function resetPasswordAction(_prev: ActionResult, formData: FormDat
   const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
   if (error) return { error: error.message };
 
-  redirect("/dashboard");
+  redirect(landingPathFor(await requireContext()));
 }
 
 /**
@@ -142,6 +146,19 @@ export async function acceptInvitationAction(
   const supabase = await createClient();
   await supabase.auth.signInWithPassword({ email: invitation.email, password: parsed.data.password });
 
-  revalidatePath("/dashboard");
-  redirect("/dashboard");
+  revalidatePath("/", "layout");
+  redirect(landingPathFor(await requireContext()));
+}
+
+/**
+ * The session is written by signInWithPassword just above, but
+ * getSessionContext is cached per request and may have been primed with
+ * "signed out" earlier in the same request. Reading it fresh here keeps the
+ * redirect honest; if it somehow comes back empty we fall back to the guard,
+ * which will send the user to /sign-in or /no-organisation as appropriate.
+ */
+async function requireContext() {
+  const ctx = await getSessionContext();
+  if (!ctx) redirect("/sign-in");
+  return ctx;
 }

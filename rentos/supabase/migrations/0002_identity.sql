@@ -116,25 +116,42 @@ create index idx_invitations_email on invitations(email);
 create index idx_invitations_token on invitations(token);
 
 -- Helper: current user's profile id (wraps auth.uid() for readability)
+-- RLS HELPERS MUST BE SECURITY DEFINER.
+--
+-- Each of these reads a table that is itself protected by a policy calling
+-- the same function: is_platform_super_admin() reads profiles, whose policy
+-- calls is_platform_super_admin(); is_org_member() reads organisation_members,
+-- whose policy calls is_org_member(). Without `security definer` the inner
+-- read re-triggers the policy and Postgres aborts with
+-- "stack depth limit exceeded".
+--
+-- That made every authenticated query fail, so getSessionContext() returned
+-- nothing, requireStaff() saw no membership, and sign-in redirected to
+-- /no-organisation on a loop. Fixed 2026-09-08.
+--
+-- search_path is pinned because security definer runs with the owner's
+-- rights; an unpinned path would let a caller shadow `profiles` with their
+-- own table and escalate.
+
 create or replace function current_profile_id()
 returns uuid language sql stable as $$
   select auth.uid();
 $$;
 
 create or replace function is_platform_super_admin()
-returns boolean language sql stable as $$
+returns boolean language sql stable security definer set search_path = public as $$
   select coalesce((select p.is_platform_super_admin from profiles p where p.id = auth.uid()), false);
 $$;
 
 -- Returns the set of organisation_ids the current user is an active member of.
 create or replace function my_organisation_ids()
-returns setof uuid language sql stable as $$
+returns setof uuid language sql stable security definer set search_path = public as $$
   select om.organisation_id from organisation_members om
   where om.profile_id = auth.uid() and om.is_active = true;
 $$;
 
 create or replace function is_org_member(org_id uuid)
-returns boolean language sql stable as $$
+returns boolean language sql stable security definer set search_path = public as $$
   select is_platform_super_admin() or exists (
     select 1 from organisation_members om
     where om.organisation_id = org_id and om.profile_id = auth.uid() and om.is_active = true
@@ -143,7 +160,7 @@ $$;
 
 -- Returns true if current user holds ANY of the given system role keys in org_id.
 create or replace function has_role(org_id uuid, variadic role_keys member_role_key[])
-returns boolean language sql stable as $$
+returns boolean language sql stable security definer set search_path = public as $$
   select is_platform_super_admin() or exists (
     select 1
     from organisation_members om
@@ -157,7 +174,7 @@ returns boolean language sql stable as $$
 $$;
 
 create or replace function has_permission(org_id uuid, perm_code text)
-returns boolean language sql stable as $$
+returns boolean language sql stable security definer set search_path = public as $$
   select is_platform_super_admin() or exists (
     select 1
     from organisation_members om

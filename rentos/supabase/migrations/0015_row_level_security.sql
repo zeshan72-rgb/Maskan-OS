@@ -563,3 +563,16 @@ create policy sub_events_select on subscription_events for select
   using (is_platform_super_admin() or exists (
     select 1 from organisation_subscriptions os where os.id = organisation_subscription_id and has_role(os.organisation_id, 'org_owner', 'org_admin')
   ));
+
+-- ---------------------------------------------------------------------
+-- OWNER PORTAL POLICIES: SECOND RECURSION, FIXED 2026-09-08
+--
+-- properties_owner_portal_select read property_owners, whose own policy
+-- read properties. Same for units and unit_owners, with buildings and
+-- property_documents cascading off properties. Postgres reported
+-- "infinite recursion detected in policy for relation".
+--
+-- The ownership question is now answered by security definer helpers
+-- (owns_property, owns_unit, tenant_occupies_unit, property_org, unit_org)
+-- so the cross-table read does not re-enter RLS. See 0015b.
+-- ---------------------------------------------------------------------

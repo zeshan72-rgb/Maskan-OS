@@ -36,6 +36,7 @@ declare
   v_vendor_id uuid;
   v_demo_owner_id uuid;
   v_demo_tenant_id uuid;
+  v_demo_vendor_id uuid;
 
   v_property_id uuid;
   v_unit_id uuid;
@@ -65,7 +66,12 @@ begin
   ------------------------------------------------------------------
   insert into auth.users (
     instance_id, id, aud, role, email, encrypted_password,
-    email_confirmed_at, created_at, updated_at, raw_app_meta_data, raw_user_meta_data
+    email_confirmed_at, created_at, updated_at, raw_app_meta_data, raw_user_meta_data,
+    -- Supabase Auth scans these into Go strings. Leaving them NULL raises
+    -- "converting NULL to string is unsupported" and every sign-in fails
+    -- before the password is checked. Empty string is required.
+    confirmation_token, recovery_token, email_change, email_change_token_new,
+    email_change_token_current, phone_change, phone_change_token, reauthentication_token
   ) values
     ('00000000-0000-0000-0000-000000000000', v_super_admin_profile, 'authenticated', 'authenticated',
       'superadmin@rentos.qa', crypt('Passw0rd!2026', gen_salt('bf')), now(), now(), now(), '{"provider":"email"}', '{}'),
@@ -81,6 +87,18 @@ begin
       'tenant@pearlpm.qa', crypt('Passw0rd!2026', gen_salt('bf')), now(), now(), now(), '{"provider":"email"}', '{}'),
     ('00000000-0000-0000-0000-000000000000', v_vendor_profile, 'authenticated', 'authenticated',
       'vendor@pearlpm.qa', crypt('Passw0rd!2026', gen_salt('bf')), now(), now(), now(), '{"provider":"email"}', '{}');
+
+  -- Email/password sign-in requires a matching auth.identities row.
+  insert into auth.identities (id, provider_id, user_id, identity_data, provider,
+                               last_sign_in_at, created_at, updated_at)
+  select gen_random_uuid(), u.id::text, u.id,
+         jsonb_build_object('sub', u.id::text, 'email', u.email,
+                            'email_verified', true, 'phone_verified', false),
+         'email', now(), now(), now()
+  from auth.users u
+  where u.email in ('superadmin@rentos.qa','admin@pearlpm.qa','manager@pearlpm.qa',
+                    'accountant@pearlpm.qa','owner@pearlpm.qa','tenant@pearlpm.qa','vendor@pearlpm.qa')
+    and not exists (select 1 from auth.identities i where i.user_id = u.id and i.provider = 'email');
 
   insert into profiles (id, full_name, email, is_platform_super_admin) values
     (v_super_admin_profile, 'RentOS Platform Admin', 'superadmin@rentos.qa', true),
@@ -302,6 +320,53 @@ begin
     'Monthly common area electricity', 1200 + floor(random()*800), current_date - floor(random()*60)::int,
     'approved', v_accountant_profile, v_accountant_profile
   from unnest(v_property_ids) as p(id);
+
+  ------------------------------------------------------------------
+  -- Portal demo memberships
+  --
+  -- tenant@ and vendor@ were created as auth users but never given an
+  -- organisation_members row, so requireStaff() sent them to
+  -- /no-organisation and neither portal could be demonstrated.
+  --
+  -- The tenant is resolved at seed time rather than hardcoded, because the
+  -- names and volumes generated above are randomised. We take whoever ends
+  -- up with an active lease and a maintenance request, preferring the one
+  -- with the most cheques and payments, so every tab in the portal has
+  -- something on it. The vendor is whichever one actually holds a work order.
+  ------------------------------------------------------------------
+  select t.id into v_demo_tenant_id
+  from tenants t
+  join leases l on l.tenant_id = t.id and l.status = 'active'
+  where t.organisation_id = v_org_id
+  order by (select count(*) from maintenance_requests mr where mr.tenant_id = t.id) desc,
+           (select count(*) from cheques ch where ch.lease_id = l.id) desc,
+           (select count(*) from payments pp where pp.tenant_id = t.id) desc,
+           t.created_at
+  limit 1;
+
+  select v.id into v_demo_vendor_id
+  from vendors v
+  where v.organisation_id = v_org_id
+  order by (select count(*) from work_orders wo where wo.vendor_id = v.id) desc, v.created_at
+  limit 1;
+
+  insert into organisation_members (organisation_id, profile_id, tenant_id, is_active)
+  values (v_org_id, v_tenant_profile, v_demo_tenant_id, true);
+  insert into member_roles (organisation_member_id, role_id)
+  select om.id, v_role_tenant from organisation_members om
+  where om.profile_id = v_tenant_profile and om.organisation_id = v_org_id;
+
+  insert into organisation_members (organisation_id, profile_id, vendor_id, is_active)
+  values (v_org_id, v_vendor_profile, v_demo_vendor_id, true);
+  insert into member_roles (organisation_member_id, role_id)
+  select om.id, v_role_vendor from organisation_members om
+  where om.profile_id = v_vendor_profile and om.organisation_id = v_org_id;
+
+  -- Name the login after whoever it was linked to.
+  update profiles set full_name = (select name from tenants where id = v_demo_tenant_id)
+   where id = v_tenant_profile;
+  update profiles set full_name = (select name from vendors where id = v_demo_vendor_id)
+   where id = v_vendor_profile;
 
   ------------------------------------------------------------------
   -- Notifications for the demo tenant login
