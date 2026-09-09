@@ -1,3 +1,6 @@
+// Reads the session server-side; not for client bundles.
+import "server-only";
+
 import { createClient } from "@/lib/supabase/server";
 import type { MemberRoleKey } from "@/types/database";
 import { cache } from "react";

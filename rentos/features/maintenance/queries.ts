@@ -1,4 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
+import type { VendorJobRow } from "@/features/maintenance/types";
+
+export type { VendorJobRow };
 import type { MaintenancePriority, MaintenanceStatus } from "@/types/database";
 
 export const PAGE_SIZE = 20;
@@ -253,22 +256,6 @@ export async function getVendorOptions(organisationId: string) {
   return data ?? [];
 }
 
-export interface VendorJobRow {
-  workOrderId: string;
-  requestId: string;
-  request_code: string;
-  description: string;
-  priority: MaintenancePriority;
-  status: MaintenanceStatus;
-  scheduled_at: string | null;
-  estimated_cost: number | null;
-  approved_amount: number | null;
-  actual_amount: number | null;
-  instructions: string | null;
-  property_name: string;
-  unit_number: string;
-  access_notes: string | null;
-}
 
 /**
  * Jobs assigned to a specific vendor. Scoped by vendor_id at the query level

@@ -1,3 +1,6 @@
+// Server guards only: they redirect and read cookies.
+import "server-only";
+
 import { redirect } from "next/navigation";
 import {
   getSessionContext,
@@ -6,6 +9,9 @@ import {
   type SessionContext,
 } from "./context";
 import type { MemberRoleKey } from "@/types/database";
+import { PermissionError } from "./errors";
+
+export { PermissionError };
 
 /**
  * Where a signed-in user should land, based on the roles they hold.
@@ -80,12 +86,6 @@ export async function requirePlatformSuperAdmin(): Promise<SessionContext> {
  * action can return a structured error to the form. RLS is still the real
  * enforcement — this produces a clean message instead of a raw DB error.
  */
-export class PermissionError extends Error {
-  constructor(message = "You do not have permission to perform this action.") {
-    super(message);
-    this.name = "PermissionError";
-  }
-}
 
 export async function assertPermission(organisationId: string, code: string): Promise<SessionContext> {
   const ctx = await getSessionContext();

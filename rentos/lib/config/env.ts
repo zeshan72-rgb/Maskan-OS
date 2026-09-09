@@ -1,3 +1,6 @@
+// Holds server-side secrets. Must not reach the browser.
+import "server-only";
+
 /**
  * Environment validation.
  *

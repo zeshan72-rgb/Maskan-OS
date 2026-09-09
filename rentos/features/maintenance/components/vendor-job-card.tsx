@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { vendorUpdateJobAction } from "@/features/maintenance/actions";
 import { formatCurrency, formatDateTime } from "@/lib/utils/format";
-import type { VendorJobRow } from "@/features/maintenance/queries";
+import type { VendorJobRow } from "@/features/maintenance/types";
 import { MAINTENANCE_PRIORITIES } from "@/lib/validation/maintenance";
 
 const PRIORITY_VARIANT = {

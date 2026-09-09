@@ -1,5 +1,5 @@
 import { ZodError, type ZodSchema } from "zod";
-import { PermissionError } from "@/lib/permissions/guards";
+import { PermissionError } from "@/lib/permissions/errors";
 
 export interface FormState {
   status: "idle" | "success" | "error";

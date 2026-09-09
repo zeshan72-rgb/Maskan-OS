@@ -1,3 +1,9 @@
+// Never bundle this for the browser. It reads cookies via next/headers and,
+// in the admin client, the service role key. Importing it from a client
+// component is now a build error naming the real file, rather than a
+// confusing "Pages Router" message from the bundler.
+import "server-only";
+
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import type { Database } from "@/types/database";
