@@ -1,8 +1,16 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils/cn";
 
+interface Crumb {
+  label: string;
+  href?: string;
+}
+
 interface PageHeaderProps {
   title: string;
+  /** Trail above the title. The last entry is the current page and is not linked. */
+  breadcrumbs?: Crumb[];
   /** A string, or an array whose null entries are dropped and the rest joined. */
   description?: ReactNode;
   /** Buttons or controls, right aligned on wide screens. */
@@ -15,7 +23,7 @@ interface PageHeaderProps {
  * line, optional actions. Kept deliberately plain so pages set their own
  * spacing below it.
  */
-export function PageHeader({ title, description, actions, className }: PageHeaderProps) {
+export function PageHeader({ title, breadcrumbs, description, actions, className }: PageHeaderProps) {
   const body = Array.isArray(description)
     ? description.filter(Boolean).join(" · ")
     : description;
@@ -28,6 +36,20 @@ export function PageHeader({ title, description, actions, className }: PageHeade
       )}
     >
       <div className="min-w-0">
+        {breadcrumbs?.length ? (
+          <nav className="mb-1 flex items-center gap-1.5 text-xs text-neutral-500">
+            {breadcrumbs.map((crumb, i) => (
+              <span key={`${crumb.label}-${i}`} className="flex items-center gap-1.5">
+                {i > 0 && <span className="text-neutral-300">/</span>}
+                {crumb.href ? (
+                  <Link href={crumb.href} className="hover:text-neutral-900 hover:underline">{crumb.label}</Link>
+                ) : (
+                  <span className="text-neutral-700">{crumb.label}</span>
+                )}
+              </span>
+            ))}
+          </nav>
+        ) : null}
         <h1 className="text-2xl font-semibold tracking-tight text-neutral-900">{title}</h1>
         {body ? <p className="mt-1 text-sm text-neutral-500">{body}</p> : null}
       </div>

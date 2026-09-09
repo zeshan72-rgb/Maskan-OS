@@ -44,6 +44,7 @@ declare
   v_schedule_id uuid;
   v_payment_id uuid;
   v_instalment record;
+  v_bounce_cheque_id uuid;
 
   prop_names text[] := array['The Pearl Residences', 'West Bay Towers', 'Al Sadd Business Center', 'Lusail Marina View', 'Al Waab Villa Compound'];
   prop_types property_type[] := array['residential','residential','commercial','residential','villa_compound']::property_type[];
@@ -220,8 +221,11 @@ begin
           v_tenant_id, 'LEASE-' || lpad(v_total_units::text, 4, '0'),
           (current_date - (floor(random()*300))::int), (current_date - (floor(random()*300))::int) + interval '1 year',
           v_rent, v_rent * 12, v_rent,
-          case when random() < 0.25 then 'quarterly' else 'monthly' end,
-          case when random() < 0.5 then 'cheque' else 'bank_transfer' end,
+          -- Explicit casts: a CASE returns text, and Postgres will not
+          -- implicitly coerce text to an enum in an INSERT column list.
+          -- Without these the seed aborts. Fixed 2026-09-08.
+          (case when random() < 0.25 then 'quarterly' else 'monthly' end)::payment_frequency,
+          (case when random() < 0.5 then 'cheque' else 'bank_transfer' end)::payment_method,
           'active', v_pm_profile, now())
         returning id into v_lease_id;
 
@@ -260,9 +264,15 @@ begin
     end loop;
   end loop;
 
-  -- One deliberately bounced cheque for QA/demo purposes
-  update cheques set status = 'submitted' where id = (select id from cheques order by created_at limit 1);
-  update cheques set status = 'bounced' where id = (select id from cheques order by created_at limit 1);
+  -- One deliberately bounced cheque for QA/demo purposes.
+  -- Every cheque above is inserted inside this transaction, so created_at is
+  -- identical for all of them and "order by created_at limit 1" picks a
+  -- different row each time. The two statements landed on different cheques
+  -- and tripped the received -> bounced transition guard. Capture one id and
+  -- walk it through the legal path. Fixed 2026-09-08.
+  select id into v_bounce_cheque_id from cheques order by created_at, id limit 1;
+  update cheques set status = 'submitted' where id = v_bounce_cheque_id;
+  update cheques set status = 'bounced'   where id = v_bounce_cheque_id;
 
   ------------------------------------------------------------------
   -- Maintenance requests + one full work order lifecycle

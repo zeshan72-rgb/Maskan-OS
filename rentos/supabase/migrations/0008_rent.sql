@@ -136,7 +136,13 @@ begin
     ) values (
       v_lease.organisation_id, v_schedule_id, p_lease_id, i,
       v_due, v_period_amount, v_period_amount,
-      case when v_due < current_date then 'overdue' when v_due = current_date then 'due' else 'upcoming' end
+      -- Explicit cast: a CASE returns text and Postgres will not implicitly
+      -- coerce it to instalment_status here. Without this, every call to
+      -- generate_rent_schedule fails, which breaks lease activation.
+      -- Fixed 2026-09-08.
+      (case when v_due < current_date then 'overdue'
+            when v_due = current_date then 'due'
+            else 'upcoming' end)::instalment_status
     );
     v_due := v_due + make_interval(months => v_months_step);
   end loop;

@@ -62,7 +62,9 @@ create table work_orders (
   id uuid primary key default gen_random_uuid(),
   organisation_id uuid not null references organisations(id) on delete cascade,
   maintenance_request_id uuid not null references maintenance_requests(id) on delete cascade,
-  vendor_id uuid references vendors_placeholder_removed_below(id), -- replaced below after vendors table exists
+  -- vendor_id is added in 0012_vendors.sql, once the vendors table exists.
+  -- A placeholder FK to a nonexistent table stood here and made this
+  -- migration unrunnable; removed 2026-09-08.
   assigned_employee_id uuid references profiles(id),
   scheduled_at timestamptz,
   estimated_cost numeric(12,2),
@@ -74,3 +76,18 @@ create table work_orders (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- work_order_events was named in this file's header, declared in
+-- types/database.ts, given RLS policies in 0015, and written to by
+-- features/maintenance/actions.ts in two places, but the CREATE TABLE was
+-- missing. Restored 2026-09-08 from the shape the application expects.
+create table work_order_events (
+  id uuid primary key default gen_random_uuid(),
+  work_order_id uuid not null references work_orders(id) on delete cascade,
+  event_type text not null,
+  notes text,
+  metadata jsonb not null default '{}'::jsonb,
+  actor_id uuid references profiles(id),
+  created_at timestamptz not null default now()
+);
+create index idx_work_order_events_wo on work_order_events(work_order_id);
