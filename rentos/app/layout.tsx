@@ -12,14 +12,18 @@ import "./globals.css";
  */
 const interTight = Inter_Tight({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
   variable: "--font-inter-tight",
   display: "swap",
 });
 
 const archivo = Archivo({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
+  // `axes` is only valid on a variable font, which means weight must be
+  // variable too: next/font rejects a fixed weight list alongside an axis.
+  // Omitting weight loads the full 100..900 range, so the width axis stays
+  // available and the headings keep their compact setting. The stylesheet
+  // asks for font-stretch: 106%, which needs wdth to be live.
+  weight: "variable",
   axes: ["wdth"],
   variable: "--font-archivo",
   display: "swap",
