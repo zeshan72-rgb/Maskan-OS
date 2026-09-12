@@ -1,14 +1,183 @@
-/* NOT RECOVERED FROM THE TRANSCRIPTS.
-   app/layout.tsx imports "./globals.css", so the build fails without it.
-   This is a minimal Tailwind entry point, not the original file. If the
-   original had custom properties, base styles or brand tokens, they are
-   lost and this will render plainer than intended. */
 @import "tailwindcss";
 
-:root {
-  --font-inter: "Inter", system-ui, sans-serif;
+/* =====================================================================
+   Maskan theme
+   =====================================================================
+   Ported from the HTML prototype (maskan-v2.html), which is the design
+   reference. Two things matter here.
+
+   1. The palette is warm, not grey. The prototype's ink is #170100, a
+      near-black brown, and every neutral carries that warmth. The
+      components were written against Tailwind's `neutral-*` scale, so
+      `neutral` is redefined below to the prototype's ramp rather than
+      adding a parallel set of tokens nobody calls. Every existing
+      `text-neutral-600` and `border-neutral-200` then lands on the
+      intended colour with no component changes.
+
+   2. Colour carries meaning. The prototype reserves it for state, which
+      is why the semantic scales are exact ports and there is no
+      decorative palette here at all.
+   ===================================================================== */
+
+@theme {
+  /* ── warm ink ramp, replacing Tailwind's grey neutrals ──
+     50/100/200 are --paper, --border-soft and --border. 900 is --text,
+     600 is --text-2, 400 is --text-3. The rest are interpolated so
+     hovers and gradients stay smooth. */
+  --color-neutral-50:  #FBF9F8;
+  --color-neutral-100: #F4F0EE;
+  --color-neutral-200: #EAE4E2;
+  --color-neutral-300: #D8CFCC;
+  --color-neutral-400: #A69894;
+  --color-neutral-500: #7A6864;
+  --color-neutral-600: #5C4A46;
+  --color-neutral-700: #43302C;
+  --color-neutral-800: #33201C;
+  --color-neutral-900: #170100;
+  --color-neutral-950: #0D0100;
+
+  /* ── brand ── */
+  --color-ink:        #170100;
+  --color-ink-soft:   #2B1512;
+  --color-ink-raised: #33201C;
+  --color-lime:       #C6F24E;
+  --color-lime-pale:  #EDFBC4;
+  --color-paper:      #FBF9F8;
+  --color-surface:    #FFFFFF;
+  --color-on-ink:     #C9BDBA;
+
+  /* ── state, ported exactly from the prototype ── */
+  --color-emerald-50:  #EAF7F1;
+  --color-emerald-200: #BCE5D4;
+  --color-emerald-500: #14A472;
+  --color-emerald-600: #129466;
+  --color-emerald-700: #0F8A5F;
+
+  --color-amber-50:  #FDF4E7;
+  --color-amber-200: #F4DFB8;
+  --color-amber-500: #DC8A1E;
+  --color-amber-600: #CE7C12;
+  --color-amber-700: #C2700A;
+  --color-amber-800: #9A5A08;
+
+  --color-red-50:  #FBEDEC;
+  --color-red-200: #F1C9C6;
+  --color-red-500: #DC4A42;
+  --color-red-600: #D63F37;
+  --color-red-700: #D0342C;
+
+  --color-sky-50:  #EBF2FC;
+  --color-sky-200: #C2D8F4;
+  --color-sky-500: #2E7FDA;
+  --color-sky-600: #2577D5;
+  --color-sky-700: #1D6FD0;
+
+  /* ── chart series, for recharts ── */
+  --color-data-1: #C6F24E;
+  --color-data-2: #7F9A2E;
+  --color-data-3: #16706B;
+  --color-data-4: #1D6FD0;
+  --color-data-5: #C2700A;
+  --color-data-6: #A6432E;
+  --color-data-7: #7A6C68;
+
+  /* ── type. Archivo for headings and figures only, never body. ── */
+  /* next/font sets these variables in app/layout.tsx. */
+  --font-sans:    var(--font-inter-tight), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-chip:  8px;
+  --radius-input: 11px;
+  --radius-card:  16px;
+  --radius-pill:  99px;
+
+  --shadow-card: 0 8px 22px rgba(23, 1, 0, 0.07);
+
+  --ease-ui:     cubic-bezier(0.2, 0, 0.2, 1);
+  --ease-settle: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-body {
-  font-family: var(--font-inter);
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background: var(--color-paper);
+    color: var(--color-neutral-900);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.5;
+    letter-spacing: -0.011em;
+  }
+
+  /* Archivo is a display face: headings and figures, never body copy.
+     The width axis is what gives it the compact, editorial feel. */
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-stretch: 106%;
+    letter-spacing: -0.042em;
+    line-height: 1.1;
+    color: var(--color-neutral-900);
+  }
+  h1 { font-size: clamp(24px, 2.4vw, 30px); line-height: 1.05; }
+  h2 { font-size: 18px; }
+  h3 { font-size: 15px; font-stretch: 104%; letter-spacing: -0.03em; }
+
+  /* Figures must not jitter as they update. */
+  td, th, input[type="number"] { font-variant-numeric: tabular-nums; }
+
+  a { color: inherit; text-decoration: none; }
+
+  ::selection { background: var(--color-lime-pale); color: var(--color-ink); }
+
+  :focus-visible { outline: 2px solid var(--color-ink); outline-offset: 2px; }
+
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-neutral-200);
+    border-radius: 99px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover { background-color: var(--color-neutral-300); background-clip: content-box; }
+  ::-webkit-scrollbar-track { background: transparent; }
+}
+
+@layer utilities {
+  /* Lists and tables fade their rows in. Components put `stagger` on a
+     tbody or wrapper and the children follow in sequence. */
+  .stagger > * { animation: slide-up 0.32s var(--ease-settle) both; }
+  .stagger > *:nth-child(1) { animation-delay: 0ms; }
+  .stagger > *:nth-child(2) { animation-delay: 32ms; }
+  .stagger > *:nth-child(3) { animation-delay: 64ms; }
+  .stagger > *:nth-child(4) { animation-delay: 96ms; }
+  .stagger > *:nth-child(5) { animation-delay: 128ms; }
+  .stagger > *:nth-child(6) { animation-delay: 160ms; }
+  .stagger > *:nth-child(7) { animation-delay: 192ms; }
+  .stagger > *:nth-child(8) { animation-delay: 224ms; }
+  .stagger > *:nth-child(n + 9) { animation-delay: 256ms; }
+
+  .font-display { font-family: var(--font-display); }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* The staggering is decoration; drop it when asked to. */
+@media (prefers-reduced-motion: reduce) {
+  .stagger > *, *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

@@ -28,7 +28,7 @@ export default async function PortalLayout({
       <header className="border-b border-neutral-200 bg-white">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-4 px-4">
           <div className="flex items-center gap-2.5 min-w-0">
-            <span className="flex h-7 w-7 items-center justify-center rounded-md bg-neutral-900 text-xs font-bold text-white">
+            <span className="flex h-7 w-7 items-center justify-center rounded-md bg-neutral-900 text-xs font-bold text-lime">
               R
             </span>
             <span className="truncate text-sm font-semibold text-neutral-900">

@@ -26,7 +26,7 @@ export function Topbar({ fullName }: { fullName: string }) {
         <Button size="icon" variant="ghost" aria-label="Notifications">
           <Bell className="h-4 w-4" />
         </Button>
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-900 text-xs font-semibold text-white">
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-900 text-xs font-semibold text-lime">
           {initials(fullName || "?")}
         </div>
         <form action={signOutAction}>
