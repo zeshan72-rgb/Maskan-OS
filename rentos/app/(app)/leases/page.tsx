@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getLeasableUnits, getTenantOptions } from "@/features/leases/queries";
 import { getPropertyOptions, getOwnerOptions } from "@/features/properties/queries";
 import { LeaseWizard } from "@/features/leases/components/lease-wizard";
+import { FilterChip, FilterRow } from "@/components/shared/filter-chip";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -59,29 +60,14 @@ export default async function LeasesPage({
         actions={wizard}
       />
 
-      <div className="mb-4 flex flex-wrap gap-1.5">
-        <Link
-          href="/leases"
-          className={`rounded-full border px-3 py-1 text-xs ${
-            !status ? "border-neutral-900 bg-neutral-900 text-white" : "border-neutral-200 text-neutral-600 hover:bg-neutral-50"
-          }`}
-        >
-          All
-        </Link>
-        {LEASE_STATUSES.map((s) => (
-          <Link
-            key={s.value}
-            href={`/leases?status=${s.value}`}
-            className={`rounded-full border px-3 py-1 text-xs ${
-              status === s.value
-                ? "border-neutral-900 bg-neutral-900 text-white"
-                : "border-neutral-200 text-neutral-600 hover:bg-neutral-50"
-            }`}
-          >
-            {s.label}
-          </Link>
+      <FilterRow>
+        <FilterChip href="/leases" active={!status}>All</FilterChip>
+        {LEASE_STATUSES.map((o) => (
+          <FilterChip key={o.value} href={`/leases?status=${o.value}`} active={status === o.value}>
+            {o.label}
+          </FilterChip>
         ))}
-      </div>
+      </FilterRow>
 
       {rows.length === 0 ? (
         <EmptyState

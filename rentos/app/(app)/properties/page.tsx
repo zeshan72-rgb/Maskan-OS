@@ -4,6 +4,7 @@ import { requireStaff } from "@/lib/permissions/guards";
 import { hasPermission } from "@/lib/permissions/context";
 import { listProperties, getOwnerOptions, PAGE_SIZE } from "@/features/properties/queries";
 import { PropertyForm } from "@/features/properties/components/property-form";
+import { FilterChip, FilterRow } from "@/components/shared/filter-chip";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Badge } from "@/components/ui/badge";
@@ -43,29 +44,14 @@ export default async function PropertiesPage({
 
       {/* Filters are plain links so the list stays server-rendered and
           shareable by URL. */}
-      <div className="mb-4 flex flex-wrap gap-1.5">
-        <Link
-          href="/properties"
-          className={`rounded-full border px-3 py-1 text-xs ${
-            !type ? "border-neutral-900 bg-neutral-900 text-white" : "border-neutral-200 text-neutral-600 hover:bg-neutral-50"
-          }`}
-        >
-          All
-        </Link>
-        {PROPERTY_TYPES.map((t) => (
-          <Link
-            key={t.value}
-            href={`/properties?type=${t.value}`}
-            className={`rounded-full border px-3 py-1 text-xs ${
-              type === t.value
-                ? "border-neutral-900 bg-neutral-900 text-white"
-                : "border-neutral-200 text-neutral-600 hover:bg-neutral-50"
-            }`}
-          >
-            {t.label}
-          </Link>
+      <FilterRow>
+        <FilterChip href="/properties" active={!type}>All</FilterChip>
+        {PROPERTY_TYPES.map((o) => (
+          <FilterChip key={o.value} href={`/properties?type=${o.value}`} active={type === o.value}>
+            {o.label}
+          </FilterChip>
         ))}
-      </div>
+      </FilterRow>
 
       {rows.length === 0 ? (
         <EmptyState

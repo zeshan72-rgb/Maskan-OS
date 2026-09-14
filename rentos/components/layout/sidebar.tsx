@@ -61,9 +61,9 @@ export function Sidebar({ orgName }: { orgName: string }) {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden w-60 shrink-0 flex-col border-r border-neutral-200 bg-white md:flex">
-      <div className="flex h-14 items-center gap-2 border-b border-neutral-200 px-4">
-        <div className="flex h-7 w-7 items-center justify-center rounded-md bg-neutral-900 text-xs font-bold text-lime">
+    <aside className="hidden w-[228px] shrink-0 flex-col border-r border-neutral-200 bg-white md:flex">
+      <div className="flex h-14 items-center gap-2.5 border-b border-neutral-200 px-4">
+        <div className="grid h-7 w-7 place-items-center rounded-[9px] bg-neutral-900 text-[13px] font-extrabold text-lime">
           R
         </div>
         <span className="text-sm font-semibold text-neutral-900">{APP_CONFIG.name}</span>
@@ -74,7 +74,7 @@ export function Sidebar({ orgName }: { orgName: string }) {
         <ChevronsUpDown className="h-3.5 w-3.5 shrink-0 text-neutral-400" />
       </button>
 
-      <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-4">
+      <nav className="flex-1 space-y-[2px] overflow-y-auto px-3 py-3.5">
         {NAV.map((item) => {
           const active = pathname === item.href || pathname.startsWith(item.href + "/");
           return (
@@ -82,7 +82,7 @@ export function Sidebar({ orgName }: { orgName: string }) {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-sm font-medium transition-colors",
+                "flex items-center gap-2.5 rounded-[9px] px-2.5 py-[7px] text-[13.5px] font-[450] transition-colors",
                 active ? "bg-neutral-100 text-neutral-900" : "text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
               )}
             >

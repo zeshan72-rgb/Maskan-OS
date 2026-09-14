@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Layers } from "lucide-react";
 import { requireStaff } from "@/lib/permissions/guards";
 import { createClient } from "@/lib/supabase/server";
+import { FilterChip, FilterRow } from "@/components/shared/filter-chip";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { StatusBadge } from "@/components/shared/status-badge";
@@ -55,14 +56,14 @@ export default async function UnitsPage({
         <StatCard label="In maintenance" value={count("maintenance")} />
       </div>
 
-      <div className="mb-4 flex flex-wrap gap-1.5">
-        <Link href="/units" className={`rounded-full border px-3 py-1 text-xs ${!status ? "border-neutral-900 bg-neutral-900 text-white" : "border-neutral-200 text-neutral-600 hover:bg-neutral-50"}`}>All</Link>
-        {UNIT_STATUSES.map((s) => (
-          <Link key={s.value} href={`/units?status=${s.value}`} className={`rounded-full border px-3 py-1 text-xs ${status === s.value ? "border-neutral-900 bg-neutral-900 text-white" : "border-neutral-200 text-neutral-600 hover:bg-neutral-50"}`}>
-            {s.label}
-          </Link>
+      <FilterRow>
+        <FilterChip href="/units" active={!status}>All</FilterChip>
+        {UNIT_STATUSES.map((o) => (
+          <FilterChip key={o.value} href={`/units?status=${o.value}`} active={status === o.value}>
+            {o.label}
+          </FilterChip>
         ))}
-      </div>
+      </FilterRow>
 
       {rows.length === 0 ? (
         <EmptyState icon={Layers} title="No units" description="Units are added from a property page." />

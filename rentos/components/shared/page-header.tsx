@@ -50,8 +50,8 @@ export function PageHeader({ title, breadcrumbs, description, actions, className
             ))}
           </nav>
         ) : null}
-        <h1 className="text-2xl font-semibold tracking-tight text-neutral-900">{title}</h1>
-        {body ? <p className="mt-1 text-sm text-neutral-500">{body}</p> : null}
+        <h1 className="font-display text-[clamp(24px,2.4vw,30px)] font-extrabold leading-[1.05] tracking-[-0.042em] text-neutral-900 [font-stretch:106%]">{title}</h1>
+        {body ? <p className="mt-[3px] text-[13.5px] leading-relaxed text-neutral-600">{body}</p> : null}
       </div>
       {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
     </div>

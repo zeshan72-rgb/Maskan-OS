@@ -32,17 +32,17 @@ export function StatCard({
 }: StatCardProps) {
   const t = TONE[tone];
   return (
-    <div className={cn("rounded-xl border border-neutral-200 bg-white p-4", className)}>
+    <div className={cn("flex flex-col rounded-[14px] border border-neutral-200 bg-white px-[18px] pb-4 pt-[17px]", className)}>
       <div className="flex items-start justify-between gap-3">
-        <p className="text-sm text-neutral-500">{label}</p>
+        <p className="text-[12.5px] font-[550] leading-tight tracking-[-0.012em] text-neutral-600">{label}</p>
         {Icon ? (
-          <span className={cn("rounded-lg p-1.5", t.icon)}>
+          <span className={cn("rounded-[8px] p-1.5", t.icon)}>
             <Icon className="h-4 w-4" />
           </span>
         ) : null}
       </div>
 
-      <p className={cn("mt-2 text-2xl font-semibold tabular-nums tracking-tight", t.value)}>
+      <p className={cn("mt-[9px] font-display text-[26px] font-extrabold leading-[1.1] tabular-nums tracking-[-0.042em] [font-stretch:104%]", t.value)}>
         {value}
       </p>
 
@@ -55,7 +55,7 @@ export function StatCard({
         </div>
       ) : null}
 
-      {sublabel ? <p className="mt-2 text-xs text-neutral-500">{sublabel}</p> : null}
+      {sublabel ? <p className="mt-1 text-[12px] leading-[1.4] text-neutral-400">{sublabel}</p> : null}
     </div>
   );
 }
