@@ -7,6 +7,7 @@ import {
   getOwnerFinancials,
 } from "@/features/portals/owner-queries";
 import PortalLayout from "@/components/layout/portal-layout";
+import { OWNER_NAV } from "@/features/portals/owner-nav";
 import { StatCard } from "@/components/shared/stat-card";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -22,7 +23,7 @@ export default async function OwnerPortalPage() {
 
   if (!ownerId) {
     return (
-      <PortalLayout title="Owner">
+      <PortalLayout title="Owner" nav={OWNER_NAV}>
         <EmptyState
           icon={AlertCircle}
           title="Your account is not linked to an owner record"
@@ -43,7 +44,7 @@ export default async function OwnerPortalPage() {
     summary.totals.units > 0 ? Math.round((summary.totals.occupied / summary.totals.units) * 100) : 0;
 
   return (
-    <PortalLayout title="Owner">
+    <PortalLayout title="Owner" nav={OWNER_NAV}>
       <div className="mb-6">
         <h1 className="text-xl font-semibold text-neutral-900">{summary.ownerName}</h1>
         <p className="text-sm text-neutral-500">
