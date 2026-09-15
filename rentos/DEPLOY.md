@@ -1,4 +1,4 @@
-# Deploying RentOS
+# Deploying Maskan
 
 Roughly 20 minutes end to end. You need a GitHub account, a Supabase account
 and a Vercel account — all free tiers are sufficient.

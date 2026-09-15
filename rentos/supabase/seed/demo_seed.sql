@@ -101,7 +101,7 @@ begin
     and not exists (select 1 from auth.identities i where i.user_id = u.id and i.provider = 'email');
 
   insert into profiles (id, full_name, email, is_platform_super_admin) values
-    (v_super_admin_profile, 'RentOS Platform Admin', 'superadmin@rentos.qa', true),
+    (v_super_admin_profile, 'Maskan Platform Admin', 'superadmin@rentos.qa', true),
     (v_admin_profile, 'Fatima Al-Sulaiti', 'admin@pearlpm.qa', false),
     (v_pm_profile, 'Ahmed Khalil', 'manager@pearlpm.qa', false),
     (v_accountant_profile, 'Mariam Al-Kuwari', 'accountant@pearlpm.qa', false),

@@ -74,7 +74,7 @@ export async function notify(params: NotifyParams): Promise<void> {
     );
   } catch (error) {
     // Notifications must never break the business action that triggered them.
-    console.error("[rentos] notification dispatch failed", params.type, error);
+    console.error("[maskan] notification dispatch failed", params.type, error);
   }
 }
 

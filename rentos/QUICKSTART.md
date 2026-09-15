@@ -4,7 +4,7 @@ No GitHub account needed. Vercel's CLI uploads your local folder directly.
 
 > **A note on expectations:** Vercel has no drag-and-drop upload in its
 > dashboard (that's Netlify). The CLI below is the equivalent — one command
-> from the unpacked folder. And because RentOS is database-backed, deploying
+> from the unpacked folder. And because Maskan is database-backed, deploying
 > the code is only half the job: without Supabase it will deploy successfully
 > and show you a setup screen explaining what's still missing. That's by
 > design, not a failure.

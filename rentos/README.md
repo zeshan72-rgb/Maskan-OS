@@ -1,6 +1,6 @@
-# RentOS
+# Maskan
 
-A multi-tenant rental-property operating system for Qatar. RentOS manages the
+A multi-tenant rental-property operating system for Qatar. Maskan manages the
 full lifecycle — organisation → owner → property → unit → tenant → lease →
 rent → payment → reconciliation → maintenance → owner reporting → renewal —
 across a manager application and three self-service portals.

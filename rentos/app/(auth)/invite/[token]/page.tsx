@@ -18,7 +18,7 @@ export default function AcceptInvitePage({ params }: { params: Promise<{ token: 
     <Card>
       <CardHeader>
         <CardTitle className="text-base">Accept your invitation</CardTitle>
-        <CardDescription>Set your name and password to activate your RentOS account.</CardDescription>
+        <CardDescription>Set your name and password to activate your Maskan account.</CardDescription>
       </CardHeader>
       <CardContent>
         <form action={formAction} className="space-y-4">

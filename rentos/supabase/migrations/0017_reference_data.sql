@@ -32,7 +32,7 @@ on conflict (code) do nothing;
 -- System roles (organisation_id null => available to every organisation)
 -- ---------------------------------------------------------------------
 insert into roles (key, name, description, is_system) values
-  ('platform_super_admin', 'Platform Super Admin', 'Full RentOS platform access', true),
+  ('platform_super_admin', 'Platform Super Admin', 'Full Maskan platform access', true),
   ('org_owner', 'Organisation Owner', 'Full access to their organisation', true),
   ('org_admin', 'Organisation Admin', 'Almost full operational access', true),
   ('property_manager', 'Property Manager', 'Properties, units, leases, tenants and operations', true),

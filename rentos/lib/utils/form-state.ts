@@ -66,6 +66,6 @@ export function toSafeError(error: unknown): FormState {
     return { status: "error", message: "A rent schedule has already been generated for this lease." };
   }
 
-  console.error("[rentos] unexpected server action error:", error);
+  console.error("[maskan] unexpected server action error:", error);
   return { status: "error", message: "Something went wrong. Please try again." };
 }

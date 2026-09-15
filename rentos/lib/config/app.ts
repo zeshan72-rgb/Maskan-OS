@@ -4,8 +4,8 @@
  * in the codebase should hardcode these values.
  */
 export const APP_CONFIG = {
-  name: "RentOS",
-  shortName: "RentOS",
+  name: "Maskan OS",
+  shortName: "Maskan",
   description: "Multi-tenant rental property operating system for Qatar",
   defaultLocale: "en" as const,
   supportedLocales: ["en", "ar"] as const,

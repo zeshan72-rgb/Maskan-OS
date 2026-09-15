@@ -1,8 +1,13 @@
 import Link from "next/link";
-import { AlertTriangle, Banknote, Building2, CalendarClock, Home, Wrench } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Building2, CalendarClock, Home, Wrench } from "lucide-react";
 import { requireStaff } from "@/lib/permissions/guards";
 import { getDashboardData } from "@/features/dashboard/queries";
-import { CollectionTrendChart, MaintenanceCategoryChart } from "@/features/dashboard/components/charts";
+import { createClient } from "@/lib/supabase/server";
+import { MaintenanceCategoryChart } from "@/features/dashboard/components/charts";
+import { CollectionHero } from "@/features/dashboard/components/collection-hero";
+import { AlertGrid, AlertTile } from "@/features/dashboard/components/alert-tile";
+import { PlanLimitBanner } from "@/features/dashboard/components/plan-limit-banner";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -12,42 +17,85 @@ import { formatCurrency } from "@/lib/utils/format";
 
 export const dynamic = "force-dynamic";
 
-const ALERT_TONE = {
-  danger: "danger",
-  warning: "warning",
-  info: "info",
-} as const;
-
 export default async function DashboardPage() {
   const { ctx, membership } = await requireStaff();
-  const data = await getDashboardData(membership.organisationId);
+  const supabase = await createClient();
+  const [data, { data: sub }, { count: userCount }] = await Promise.all([
+    getDashboardData(membership.organisationId),
+    supabase
+      .from("organisation_subscriptions")
+      .select("current_period_end, plans ( name, max_units, max_users )")
+      .eq("organisation_id", membership.organisationId)
+      .maybeSingle(),
+    supabase
+      .from("organisation_members")
+      .select("id", { count: "exact", head: true })
+      .eq("organisation_id", membership.organisationId)
+      .eq("is_active", true),
+  ]);
+
+  const plan = (Array.isArray(sub?.plans) ? sub?.plans[0] : sub?.plans) as
+    | { name: string; max_units: number | null; max_users: number | null }
+    | undefined;
 
   return (
     <>
+      {plan && (
+        <PlanLimitBanner
+          planName={plan.name}
+          units={data.portfolio.units}
+          maxUnits={plan.max_units}
+          users={userCount ?? 0}
+          maxUsers={plan.max_users}
+          renewsOn={
+            sub?.current_period_end
+              ? new Date(sub.current_period_end).toLocaleDateString("en-GB", {
+                  day: "numeric", month: "long", year: "numeric",
+                })
+              : null
+          }
+        />
+      )}
+
       <PageHeader
         title={`Good day, ${ctx.fullName.split(" ")[0]}`}
-        description={`${membership.organisationName} — portfolio, collection and operations at a glance.`}
+        description={`Portfolio overview for ${membership.organisationName}.`}
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <Link href="/reports"><Button variant="outline" size="sm">Export</Button></Link>
+            <Link href="/leases"><Button size="sm">New lease</Button></Link>
+          </div>
+        }
       />
 
       {data.alerts.length > 0 && (
-        <div className="stagger mb-6 space-y-2">
+        <AlertGrid>
           {data.alerts.map((alert) => (
-            <Link
+            <AlertTile
               key={alert.href + alert.label}
               href={alert.href}
-              className="flex items-center justify-between rounded-xl border border-neutral-200 bg-white px-4 py-3 transition-colors hover:border-neutral-300"
-            >
-              <span className="flex items-center gap-2.5 text-sm text-neutral-800">
-                <AlertTriangle className="h-4 w-4 text-neutral-400" />
-                {alert.label}
-              </span>
-              <Badge variant={ALERT_TONE[alert.tone]}>{alert.count}</Badge>
-            </Link>
+              label={alert.label}
+              count={alert.count}
+              tone={alert.tone}
+            />
           ))}
-        </div>
+        </AlertGrid>
       )}
 
-      <div className="stagger mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <CollectionHero
+        monthLabel={new Date().toLocaleString("en-GB", { month: "long", year: "numeric" })}
+        collected={data.rent.collected}
+        due={data.rent.expected}
+        outstanding={data.rent.outstanding}
+        behindCount={data.alerts.find((a) => a.href === "/outstanding")?.count ?? 0}
+        trend={data.collectionTrend.map((t) => ({
+          label: t.month,
+          rate: t.expected > 0 ? Math.round((t.collected / t.expected) * 100) : 0,
+        }))}
+      />
+
+      {/* The secondary figures. Collection leads above; these support it. */}
+      <div className="stagger mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           label="Occupancy"
           value={`${data.portfolio.occupancyPct}%`}
@@ -56,20 +104,10 @@ export default async function DashboardPage() {
           sublabel={`${data.portfolio.occupied} of ${data.portfolio.units} units let`}
         />
         <StatCard
-          label="Collected this month"
-          value={formatCurrency(data.rent.collected)}
-          icon={Banknote}
-          tone="success"
-          progress={data.rent.collectionPct}
-          sublabel={`${data.rent.collectionPct}% of ${formatCurrency(data.rent.expected)} due`}
-        />
-        <StatCard
-          label="Outstanding"
-          value={formatCurrency(data.rent.outstanding)}
-          tone={data.rent.overdue > 0 ? "danger" : data.rent.outstanding > 0 ? "warning" : "success"}
-          sublabel={
-            data.rent.overdue > 0 ? `${formatCurrency(data.rent.overdue)} overdue` : "Nothing overdue"
-          }
+          label="Active leases"
+          value={data.leases.active}
+          icon={CalendarClock}
+          sublabel={`${data.leases.expiring60} expiring within 60 days`}
         />
         <StatCard
           label="Open maintenance"
@@ -82,27 +120,16 @@ export default async function DashboardPage() {
               : `${data.maintenance.inProgress} in progress`
           }
         />
+        <StatCard
+          label="Vacant units"
+          value={data.portfolio.vacant}
+          icon={Building2}
+          tone={data.portfolio.vacant > 0 ? "warning" : "success"}
+          sublabel={`across ${data.portfolio.properties} properties`}
+        />
       </div>
 
-      <div className="mb-6 grid gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Collection trend</CardTitle>
-            <CardDescription>Rent due against rent collected, last six months.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {data.collectionTrend.length === 0 ? (
-              <EmptyState
-                icon={Banknote}
-                title="No rent history yet"
-                description="Once leases are activated and instalments fall due, the trend appears here."
-              />
-            ) : (
-              <CollectionTrendChart data={data.collectionTrend} />
-            )}
-          </CardContent>
-        </Card>
-
+      <div className="mb-5 grid gap-4">
         <Card>
           <CardHeader>
             <CardTitle>Maintenance by category</CardTitle>

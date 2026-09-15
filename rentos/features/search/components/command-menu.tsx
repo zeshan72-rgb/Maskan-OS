@@ -119,7 +119,7 @@ export function CommandMenu({ open, onOpenChange }: { open: boolean; onOpenChang
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-xl gap-0 p-0">
-        <DialogTitle className="sr-only">Search RentOS</DialogTitle>
+        <DialogTitle className="sr-only">Search Maskan</DialogTitle>
 
         <div className="flex items-center gap-2 border-b border-neutral-200 px-4 py-3">
           <Search className="h-4 w-4 shrink-0 text-neutral-400" />

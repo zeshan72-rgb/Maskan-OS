@@ -22,6 +22,6 @@ export async function recordAudit(params: {
       p_metadata: (params.metadata ?? {}) as never,
     });
   } catch (error) {
-    console.error("[rentos] audit write failed", params.action, error);
+    console.error("[maskan] audit write failed", params.action, error);
   }
 }

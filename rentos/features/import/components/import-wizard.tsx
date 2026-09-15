@@ -62,7 +62,7 @@ export function ImportWizard() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `rentos-${type}-template.csv`;
+    link.download = `maskan-${type}-template.csv`;
     link.click();
     URL.revokeObjectURL(url);
   }
