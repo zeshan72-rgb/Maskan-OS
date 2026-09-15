@@ -37,7 +37,9 @@ export default async function TenantContractPage() {
 
   const supabase = await createClient();
   const { data: leases } = await supabase
-    .from("leases").select("id, lease_code, status, start_date, end_date")
+    .from("leases").select(
+      "id, lease_code, status, start_date, end_date"
+    )
     .eq("tenant_id", tenantId).order("start_date", { ascending: false });
   const lease = (leases ?? [])[0];
 
@@ -52,10 +54,14 @@ export default async function TenantContractPage() {
 
   const [{ data: docs }, { data: parties }] = await Promise.all([
     supabase.from("lease_documents")
-      .select("id, title, is_signed, created_at, storage_path")
+      .select(
+      "id, title, is_signed, created_at, storage_path"
+    )
       .eq("lease_id", lease.id).order("created_at", { ascending: false }),
     supabase.from("lease_parties")
-      .select("id, party_type, name, qid_or_passport").eq("lease_id", lease.id),
+      .select(
+      "id, party_type, name, qid_or_passport"
+    ).eq("lease_id", lease.id),
   ]);
 
   const documents = (docs ?? []) as LeaseDocRow[];

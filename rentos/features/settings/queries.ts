@@ -45,27 +45,37 @@ export async function getOrganisationSettings(organisationId: string): Promise<O
     await Promise.all([
       supabase
         .from("organisations")
-        .select("id, name, legal_name, email, phone, address, currency, timezone, status")
+        .select(
+      "id, name, legal_name, email, phone, address, currency, timezone, status"
+    )
         .eq("id", organisationId)
         .single(),
       supabase
         .from("organisation_members")
-        .select("id, is_active, profile_id, profiles ( full_name, email ), member_roles ( roles ( name ) )")
+        .select(
+      "id, is_active, profile_id, profiles ( full_name, email ), member_roles ( roles ( name ) )"
+    )
         .eq("organisation_id", organisationId),
       supabase
         .from("invitations")
-        .select("id, email, expires_at, status, roles ( name )")
+        .select(
+      "id, email, expires_at, status, roles ( name )"
+    )
         .eq("organisation_id", organisationId)
         .eq("status", "pending")
         .order("created_at", { ascending: false }),
       supabase
         .from("bank_accounts")
-        .select("id, bank_name, account_name, account_number, iban, is_default")
+        .select(
+      "id, bank_name, account_name, account_number, iban, is_default"
+    )
         .eq("organisation_id", organisationId)
         .order("is_default", { ascending: false }),
       supabase
         .from("feature_flags")
-        .select("key, is_enabled")
+        .select(
+      "key, is_enabled"
+    )
         .or(`organisation_id.is.null,organisation_id.eq.${organisationId}`),
     ]);
 

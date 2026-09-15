@@ -53,7 +53,9 @@ export async function notify(params: NotifyParams): Promise<void> {
     if (linkedColumn) {
       const { data: members } = await supabase
         .from("organisation_members")
-        .select("profile_id")
+        .select(
+      "profile_id"
+    )
         .eq("organisation_id", params.organisationId)
         .eq(linkedColumn.column, linkedColumn.value)
         .eq("is_active", true);
@@ -87,7 +89,9 @@ export async function getUnreadNotifications(profileId: string, limit = 20) {
   const supabase = await createClient();
   const { data } = await supabase
     .from("notifications")
-    .select("id, type, title, body, link, is_read, created_at")
+    .select(
+      "id, type, title, body, link, is_read, created_at"
+    )
     .eq("profile_id", profileId)
     .order("created_at", { ascending: false })
     .limit(limit);

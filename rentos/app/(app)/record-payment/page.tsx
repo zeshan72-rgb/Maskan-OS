@@ -38,7 +38,9 @@ export default async function RecordPaymentPage({
   const supabase = await createClient();
   const { data: leases } = await supabase
     .from("leases")
-    .select("id, lease_code, monthly_rent, status, tenants ( name ), units ( unit_number ), properties ( name ), rent_instalments ( outstanding_amount )")
+    .select(
+      "id, lease_code, monthly_rent, status, tenants ( name ), units ( unit_number ), properties ( name ), rent_instalments ( outstanding_amount )"
+    )
     .eq("organisation_id", membership.organisationId)
     .in("status", ["active", "expiring", "renewal_offered"])
     .order("lease_code");

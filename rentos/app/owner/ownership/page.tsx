@@ -36,10 +36,14 @@ export default async function OwnerOwnershipPage() {
   const supabase = await createClient();
   const [{ data: propShares }, { data: unitShares }] = await Promise.all([
     supabase.from("property_owners")
-      .select("ownership_percentage, properties ( id, name, address, units ( id ) )")
+      .select(
+      "ownership_percentage, properties ( id, name, address, units ( id ) )"
+    )
       .eq("owner_id", ownerId),
     supabase.from("unit_owners")
-      .select("ownership_percentage, units ( id, unit_number, status, properties ( name ) )")
+      .select(
+      "ownership_percentage, units ( id, unit_number, status, properties ( name ) )"
+    )
       .eq("owner_id", ownerId),
   ]);
 

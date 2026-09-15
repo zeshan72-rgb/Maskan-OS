@@ -73,7 +73,9 @@ export async function runImportAction(type: ImportType, rows: ValidatedRow[]): P
       const codes = Array.from(new Set(rows.map((r) => r.values.property_code)));
       const { data: properties } = await supabase
         .from("properties")
-        .select("id, property_code")
+        .select(
+      "id, property_code"
+    )
         .eq("organisation_id", organisationId)
         .in("property_code", codes);
 

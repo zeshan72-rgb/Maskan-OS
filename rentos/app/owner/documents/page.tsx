@@ -27,7 +27,9 @@ export default async function OwnerDocumentsPage() {
 
   const supabase = await createClient();
   const { data: shares } = await supabase
-    .from("property_owners").select("property_id").eq("owner_id", ownerId);
+    .from("property_owners").select(
+      "property_id"
+    ).eq("owner_id", ownerId);
   const propertyIds = (shares ?? []).map((s) => s.property_id);
 
   // Paperwork filed against the owner's properties, plus anything filed
@@ -35,11 +37,15 @@ export default async function OwnerDocumentsPage() {
   const [{ data: propDocs }, { data: orgDocs }] = await Promise.all([
     propertyIds.length
       ? supabase.from("property_documents")
-          .select("id, title, category, created_at, properties ( name )")
+          .select(
+      "id, title, category, created_at, properties ( name )"
+    )
           .in("property_id", propertyIds).order("created_at", { ascending: false })
       : Promise.resolve({ data: [] }),
     supabase.from("documents")
-      .select("id, title, category, created_at, related_table, related_id")
+      .select(
+      "id, title, category, created_at, related_table, related_id"
+    )
       .eq("organisation_id", membership.organisationId)
       .eq("related_table", "owners").eq("related_id", ownerId)
       .order("created_at", { ascending: false }),

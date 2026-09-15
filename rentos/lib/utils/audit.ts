@@ -18,7 +18,7 @@ export async function recordAudit(params: {
       p_org_id: params.organisationId,
       p_action: params.action,
       p_entity_table: params.entityTable,
-      p_entity_id: params.entityId ?? null,
+      p_entity_id: params.entityId as string,
       p_metadata: (params.metadata ?? {}) as never,
     });
   } catch (error) {

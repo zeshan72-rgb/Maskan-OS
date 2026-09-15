@@ -29,13 +29,17 @@ export default async function LedgerPage() {
   const [{ data: instalments }, { data: allocations }] = await Promise.all([
     supabase
       .from("rent_instalments")
-      .select("id, instalment_number, due_date, original_amount, outstanding_amount, status, leases ( id, lease_code, tenants ( name ) )")
+      .select(
+      "id, instalment_number, due_date, original_amount, outstanding_amount, status, leases ( id, lease_code, tenants ( name ) )"
+    )
       .eq("organisation_id", membership.organisationId)
       .order("due_date", { ascending: false })
       .limit(150),
     supabase
       .from("payment_allocations")
-      .select("id, amount, created_at, payments ( id, reference, method, paid_at, status, tenants ( name ) ), rent_instalments ( instalment_number, due_date, leases ( lease_code ) )")
+      .select(
+      "id, amount, created_at, payments ( id, reference, method, paid_at, status, tenants ( name ) ), rent_instalments ( instalment_number, due_date, leases ( lease_code ) )"
+    )
       .order("created_at", { ascending: false })
       .limit(150),
   ]);

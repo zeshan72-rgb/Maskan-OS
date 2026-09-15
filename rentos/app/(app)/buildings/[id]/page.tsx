@@ -23,7 +23,9 @@ export default async function BuildingDetailPage({ params }: { params: Promise<{
 
   const { data: building } = await supabase
     .from("buildings")
-    .select("id, name, floors, properties!inner ( id, name, address, organisation_id )")
+    .select(
+      "id, name, floors, properties!inner ( id, name, address, organisation_id )"
+    )
     .eq("id", id)
     .eq("properties.organisation_id", membership.organisationId)
     .maybeSingle();
@@ -32,7 +34,9 @@ export default async function BuildingDetailPage({ params }: { params: Promise<{
 
   const { data: units } = await supabase
     .from("units")
-    .select("id, unit_number, floor, bedrooms, bathrooms, area_sqm, unit_type, current_rent, market_rent, status")
+    .select(
+      "id, unit_number, floor, bedrooms, bathrooms, area_sqm, unit_type, current_rent, market_rent, status"
+    )
     .eq("building_id", id)
     .order("unit_number");
 

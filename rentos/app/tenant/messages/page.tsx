@@ -42,7 +42,9 @@ export default async function TenantMessagesPage() {
   const supabase = await createClient();
   const { data } = await supabase
     .from("notifications")
-    .select("id, type, title, body, is_read, created_at")
+    .select(
+      "id, type, title, body, is_read, created_at"
+    )
     .eq("profile_id", ctx.userId)
     .order("created_at", { ascending: false })
     .limit(20);

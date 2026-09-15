@@ -29,13 +29,17 @@ export default async function OwnerVacancyPage() {
   const supabase = await createClient();
   // Units in properties this owner holds, that are currently empty.
   const { data: shares } = await supabase
-    .from("property_owners").select("property_id").eq("owner_id", ownerId);
+    .from("property_owners").select(
+      "property_id"
+    ).eq("owner_id", ownerId);
   const propertyIds = (shares ?? []).map((s) => s.property_id);
 
   const { data: units } = propertyIds.length
     ? await supabase
         .from("units")
-        .select("id, unit_number, bedrooms, area_sqm, unit_type, market_rent, updated_at, properties ( name )")
+        .select(
+      "id, unit_number, bedrooms, area_sqm, unit_type, market_rent, updated_at, properties ( name )"
+    )
         .in("property_id", propertyIds)
         .eq("status", "vacant")
         .order("updated_at")

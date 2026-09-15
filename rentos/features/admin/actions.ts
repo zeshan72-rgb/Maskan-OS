@@ -22,7 +22,9 @@ export async function setOrganisationStatusAction(
 
     const { data: org } = await admin
       .from("organisations")
-      .select("id, name, status")
+      .select(
+      "id, name, status"
+    )
       .eq("id", organisationId)
       .maybeSingle();
     if (!org) return { status: "error", message: "Organisation not found." };
@@ -53,15 +55,21 @@ export async function assignPlanAction(organisationId: string, planId: string): 
     const admin = createAdminClient();
 
     const [{ data: org }, { data: plan }] = await Promise.all([
-      admin.from("organisations").select("id, name").eq("id", organisationId).maybeSingle(),
-      admin.from("plans").select("id, name, key").eq("id", planId).maybeSingle(),
+      admin.from("organisations").select(
+      "id, name"
+    ).eq("id", organisationId).maybeSingle(),
+      admin.from("plans").select(
+      "id, name, key"
+    ).eq("id", planId).maybeSingle(),
     ]);
     if (!org) return { status: "error", message: "Organisation not found." };
     if (!plan) return { status: "error", message: "Plan not found." };
 
     const { data: existing } = await admin
       .from("organisation_subscriptions")
-      .select("id, plan_id")
+      .select(
+      "id, plan_id"
+    )
       .eq("organisation_id", organisationId)
       .maybeSingle();
 
@@ -91,7 +99,9 @@ export async function assignPlanAction(organisationId: string, planId: string): 
           current_period_end: periodEnd.toISOString(),
           assigned_by: ctx.userId,
         })
-        .select("id")
+        .select(
+      "id"
+    )
         .single();
       if (error) throw error;
       subscriptionId = data.id;
@@ -130,12 +140,13 @@ export async function setPlatformFeatureFlagAction(
     const ctx = await requirePlatformSuperAdmin();
     const admin = createAdminClient();
 
-    const { data: existing } = await admin
-      .from("feature_flags")
-      .select("id")
-      .eq("key", key)
-      .is("organisation_id", organisationId ? undefined : null)
-      .maybeSingle();
+    // .is() accepts null or a boolean, not undefined, so the two cases
+    // branch rather than passing a conditional into one call.
+    const base = admin.from("feature_flags").select("id").eq("key", key);
+    const scoped = organisationId
+      ? base.eq("organisation_id", organisationId)
+      : base.is("organisation_id", null);
+    const { data: existing } = await scoped.maybeSingle();
 
     if (existing) {
       const { error } = await admin

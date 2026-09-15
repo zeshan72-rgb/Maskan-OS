@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { FileText } from "lucide-react";
 import { requireStaff } from "@/lib/permissions/guards";
+import type { Database } from "@/types/database";
 import { hasPermission } from "@/lib/permissions/context";
 import { createClient } from "@/lib/supabase/server";
 import { getLeasableUnits, getTenantOptions } from "@/features/leases/queries";
@@ -29,13 +30,12 @@ export default async function LeasesPage({
   let query = supabase
     .from("leases")
     .select(
-      "id, lease_code, start_date, end_date, monthly_rent, status, " +
-        "properties ( id, name ), units ( id, unit_number ), tenants ( id, name )"
+      "id, lease_code, start_date, end_date, monthly_rent, status, properties ( id, name ), units ( id, unit_number ), tenants ( id, name )"
     )
     .eq("organisation_id", membership.organisationId)
     .order("end_date", { ascending: true });
 
-  if (status) query = query.eq("status", status);
+  if (status) query = query.eq("status", status as Database["public"]["Enums"]["lease_status"]);
 
   const [{ data: leases }, properties, units, tenants, owners] = await Promise.all([
     query,

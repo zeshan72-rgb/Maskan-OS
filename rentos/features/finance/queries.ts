@@ -24,31 +24,41 @@ export async function getFinanceOverview(organisationId: string): Promise<Financ
   const [monthInstalments, allOutstanding, expenses, pending, cheques] = await Promise.all([
     supabase
       .from("rent_instalments")
-      .select("original_amount, outstanding_amount")
+      .select(
+      "original_amount, outstanding_amount"
+    )
       .eq("organisation_id", organisationId)
       .gte("due_date", monthStart)
       .lte("due_date", monthEnd),
     supabase
       .from("rent_instalments")
-      .select("outstanding_amount")
+      .select(
+      "outstanding_amount"
+    )
       .eq("organisation_id", organisationId)
       .gt("outstanding_amount", 0)
       .lt("due_date", today),
     supabase
       .from("property_expenses")
-      .select("amount, expense_categories ( name )")
+      .select(
+      "amount, expense_categories ( name )"
+    )
       .eq("organisation_id", organisationId)
       .eq("approval_status", "approved")
       .gte("expense_date", monthStart)
       .lte("expense_date", monthEnd),
     supabase
       .from("payments")
-      .select("amount")
+      .select(
+      "amount"
+    )
       .eq("organisation_id", organisationId)
       .eq("status", "pending_verification"),
     supabase
       .from("cheques")
-      .select("amount")
+      .select(
+      "amount"
+    )
       .eq("organisation_id", organisationId)
       .in("status", ["received", "stored", "due_soon"])
       .lte("cheque_date", in30.toISOString().slice(0, 10)),
@@ -184,7 +194,9 @@ export async function buildOwnerStatement(
 
   const { data: owner } = await supabase
     .from("owners")
-    .select("id, name")
+    .select(
+      "id, name"
+    )
     .eq("id", ownerId)
     .eq("organisation_id", organisationId)
     .maybeSingle();
@@ -192,7 +204,9 @@ export async function buildOwnerStatement(
 
   const { data: links } = await supabase
     .from("property_owners")
-    .select("property_id, properties ( name )")
+    .select(
+      "property_id, properties ( name )"
+    )
     .eq("owner_id", ownerId);
   const propertyIds = (links ?? []).map((l) => l.property_id);
 
@@ -201,7 +215,9 @@ export async function buildOwnerStatement(
   // Opening balance: everything recorded before this period.
   const { data: priorTransactions } = await supabase
     .from("owner_transactions")
-    .select("amount")
+    .select(
+      "amount"
+    )
     .eq("owner_id", ownerId)
     .lt("transaction_date", periodStart);
   const openingBalance = (priorTransactions ?? []).reduce((s, t) => s + Number(t.amount), 0);
@@ -214,7 +230,9 @@ export async function buildOwnerStatement(
   if (propertyIds.length > 0) {
     const { data: leases } = await supabase
       .from("leases")
-      .select("id, property_id")
+      .select(
+      "id, property_id"
+    )
       .in("property_id", propertyIds);
     const leaseIds = (leases ?? []).map((l) => l.id);
 
@@ -222,7 +240,9 @@ export async function buildOwnerStatement(
       // Rent "received" = the settled portion of instalments due in the period.
       const { data: instalments } = await supabase
         .from("rent_instalments")
-        .select("original_amount, outstanding_amount, due_date, lease_id")
+        .select(
+      "original_amount, outstanding_amount, due_date, lease_id"
+    )
         .in("lease_id", leaseIds)
         .gte("due_date", periodStart)
         .lte("due_date", periodEnd);
@@ -236,7 +256,9 @@ export async function buildOwnerStatement(
 
     const { data: expenseRows } = await supabase
       .from("property_expenses")
-      .select("amount, description, maintenance_request_id, expense_categories ( name ), properties ( name )")
+      .select(
+      "amount, description, maintenance_request_id, expense_categories ( name ), properties ( name )"
+    )
       .in("property_id", propertyIds)
       .eq("approval_status", "approved")
       .gte("expense_date", periodStart)
@@ -266,7 +288,9 @@ export async function buildOwnerStatement(
   // Manual adjustments recorded directly against the owner in this period.
   const { data: adjustmentRows } = await supabase
     .from("owner_transactions")
-    .select("amount, notes")
+    .select(
+      "amount, notes"
+    )
     .eq("owner_id", ownerId)
     .eq("transaction_type", "adjustment")
     .gte("transaction_date", periodStart)
@@ -302,7 +326,9 @@ export async function listOwnerStatements(organisationId: string) {
   const supabase = await createClient();
   const { data } = await supabase
     .from("owner_statements")
-    .select("id, owner_id, period_start, period_end, owner_payout, closing_balance, status, version, owners ( name )")
+    .select(
+      "id, owner_id, period_start, period_end, owner_payout, closing_balance, status, version, owners ( name )"
+    )
     .eq("organisation_id", organisationId)
     .order("period_start", { ascending: false })
     .limit(100);

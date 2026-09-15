@@ -51,7 +51,9 @@ export async function createLeaseAction(_prev: FormState, formData: FormData): P
     // The unit must belong to this org and not already have a live lease.
     const { data: unit } = await supabase
       .from("units")
-      .select("id, property_id, status")
+      .select(
+      "id, property_id, status"
+    )
       .eq("id", input.unit_id)
       .eq("organisation_id", organisationId)
       .maybeSingle();
@@ -91,7 +93,9 @@ export async function createLeaseAction(_prev: FormState, formData: FormData): P
         status: "draft",
         created_by: ctx.userId,
       })
-      .select("id")
+      .select(
+      "id"
+    )
       .single();
 
     if (error) throw error;
@@ -128,7 +132,9 @@ export async function activateLeaseAction(leaseId: string): Promise<FormState> {
 
     const { data: lease } = await supabase
       .from("leases")
-      .select("id, status, unit_id, tenant_id, lease_code")
+      .select(
+      "id, status, unit_id, tenant_id, lease_code"
+    )
       .eq("id", leaseId)
       .eq("organisation_id", organisationId)
       .maybeSingle();
@@ -193,7 +199,9 @@ export async function terminateLeaseAction(leaseId: string, reason: string): Pro
 
     const { data: lease } = await supabase
       .from("leases")
-      .select("id, status, unit_id, lease_code")
+      .select(
+      "id, status, unit_id, lease_code"
+    )
       .eq("id", leaseId)
       .eq("organisation_id", organisationId)
       .maybeSingle();
@@ -247,7 +255,9 @@ export async function createRenewalOfferAction(_prev: FormState, formData: FormD
     const supabase = await createClient();
     const { data: lease } = await supabase
       .from("leases")
-      .select("id, status, tenant_id, lease_code")
+      .select(
+      "id, status, tenant_id, lease_code"
+    )
       .eq("id", input.lease_id)
       .eq("organisation_id", organisationId)
       .maybeSingle();
@@ -268,7 +278,9 @@ export async function createRenewalOfferAction(_prev: FormState, formData: FormD
         notes: input.notes ?? null,
         created_by: ctx.userId,
       })
-      .select("id")
+      .select(
+      "id"
+    )
       .single();
     if (error) throw error;
 
@@ -309,7 +321,9 @@ export async function acceptRenewalOfferAction(offerId: string, responseNotes?: 
 
     const { data: offer } = await supabase
       .from("lease_renewal_offers")
-      .select("id, lease_id, new_start_date, new_end_date, new_monthly_rent, new_security_deposit, status")
+      .select(
+      "id, lease_id, new_start_date, new_end_date, new_monthly_rent, new_security_deposit, status"
+    )
       .eq("id", offerId)
       .maybeSingle();
     if (!offer) return { status: "error", message: "Renewal offer not found." };
@@ -317,7 +331,9 @@ export async function acceptRenewalOfferAction(offerId: string, responseNotes?: 
 
     const { data: lease } = await supabase
       .from("leases")
-      .select("id, organisation_id, property_id, unit_id, owner_id, tenant_id, payment_frequency, payment_method, grace_period_days")
+      .select(
+      "id, organisation_id, property_id, unit_id, owner_id, tenant_id, payment_frequency, payment_method, grace_period_days"
+    )
       .eq("id", offer.lease_id)
       .maybeSingle();
     if (!lease) return { status: "error", message: "Original lease not found." };
@@ -346,7 +362,9 @@ export async function acceptRenewalOfferAction(offerId: string, responseNotes?: 
         previous_lease_id: lease.id,
         created_by: ctx.userId,
       })
-      .select("id")
+      .select(
+      "id"
+    )
       .single();
     if (createError) throw createError;
 
@@ -408,7 +426,9 @@ export async function respondToRenewalOfferAction(
     const supabase = await createClient();
     const { data: offer } = await supabase
       .from("lease_renewal_offers")
-      .select("id, lease_id, status")
+      .select(
+      "id, lease_id, status"
+    )
       .eq("id", offerId)
       .maybeSingle();
     if (!offer) return { status: "error", message: "Renewal offer not found." };

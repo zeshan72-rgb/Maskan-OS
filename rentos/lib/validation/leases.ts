@@ -6,19 +6,19 @@ const optionalString = z
   .optional()
   .transform((v) => (v === "" ? undefined : v));
 
-const money = z
-  .union([z.string(), z.number()])
-  .transform((v) => (typeof v === "number" ? v : Number(v)))
-  .refine((v) => Number.isFinite(v), "Enter a valid amount");
+// z.coerce.number() stays a ZodNumber, so `.refine()` at the call sites
+// keeps the output typed as number. The previous union/transform/refine
+// chain widened back to string | number, and a plain z.preprocess made the
+// input unknown, which refine then propagated. Both broke every insert
+// against a numeric column.
+const money = z.coerce.number().finite("Enter a valid amount");
 
-const optionalMoney = z
-  .union([z.string(), z.number()])
-  .optional()
-  .transform((v) => {
-    if (v === undefined || v === "" || v === null) return undefined;
-    const n = typeof v === "number" ? v : Number(v);
-    return Number.isFinite(n) ? n : undefined;
-  });
+// Empty form fields arrive as "", which z.coerce would turn into 0. Strip
+// those to undefined first, then coerce whatever is left.
+const optionalMoney: z.ZodType<number | undefined, z.ZodTypeDef, unknown> = z.preprocess(
+  (v) => (v === "" || v === null ? undefined : v),
+  z.coerce.number().finite("Enter a valid amount").optional()
+);
 
 const isoDate = z
   .string()

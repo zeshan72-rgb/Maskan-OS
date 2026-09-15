@@ -28,7 +28,9 @@ export async function createPropertyAction(_prev: FormState, formData: FormData)
     const { data, error } = await supabase
       .from("properties")
       .insert({ ...propertyFields, organisation_id: organisationId, created_by: ctx.userId })
-      .select("id")
+      .select(
+      "id"
+    )
       .single();
 
     if (error) throw error;
@@ -148,7 +150,9 @@ export async function createUnitAction(_prev: FormState, formData: FormData): Pr
     // against it. RLS would also reject it, but this yields a clear message.
     const { data: property } = await supabase
       .from("properties")
-      .select("id")
+      .select(
+      "id"
+    )
       .eq("id", parsed.data.property_id)
       .eq("organisation_id", organisationId)
       .maybeSingle();
@@ -158,7 +162,9 @@ export async function createUnitAction(_prev: FormState, formData: FormData): Pr
     const { data, error } = await supabase
       .from("units")
       .insert({ ...parsed.data, organisation_id: organisationId })
-      .select("id")
+      .select(
+      "id"
+    )
       .single();
 
     if (error) throw error;

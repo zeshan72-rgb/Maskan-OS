@@ -50,7 +50,9 @@ export async function recordExpenseAction(_prev: FormState, formData: FormData):
 
     const { data: property } = await supabase
       .from("properties")
-      .select("id")
+      .select(
+      "id"
+    )
       .eq("id", input.property_id)
       .eq("organisation_id", organisationId)
       .maybeSingle();
@@ -62,7 +64,9 @@ export async function recordExpenseAction(_prev: FormState, formData: FormData):
     if (!ownerId) {
       const { data: link } = await supabase
         .from("property_owners")
-        .select("owner_id")
+        .select(
+      "owner_id"
+    )
         .eq("property_id", input.property_id)
         .limit(1)
         .maybeSingle();
@@ -85,7 +89,9 @@ export async function recordExpenseAction(_prev: FormState, formData: FormData):
         approval_status: "pending",
         created_by: ctx.userId,
       })
-      .select("id")
+      .select(
+      "id"
+    )
       .single();
     if (error) throw error;
 
@@ -114,7 +120,9 @@ export async function approveExpenseAction(expenseId: string, approve: boolean):
 
     const { data: expense } = await supabase
       .from("property_expenses")
-      .select("id, amount, owner_id, property_id, description, expense_date, approval_status")
+      .select(
+      "id, amount, owner_id, property_id, description, expense_date, approval_status"
+    )
       .eq("id", expenseId)
       .eq("organisation_id", organisationId)
       .maybeSingle();
@@ -186,7 +194,9 @@ export async function generateOwnerStatementAction(
 
     const { data: existing } = await supabase
       .from("owner_statements")
-      .select("id, version, status")
+      .select(
+      "id, version, status"
+    )
       .eq("owner_id", ownerId)
       .eq("period_start", periodStart)
       .eq("period_end", periodEnd)
@@ -222,7 +232,9 @@ export async function generateOwnerStatementAction(
         status: "draft",
         version,
       })
-      .select("id")
+      .select(
+      "id"
+    )
       .single();
     if (error) throw error;
 
@@ -261,7 +273,9 @@ export async function finaliseOwnerStatementAction(statementId: string): Promise
 
     const { data: statement } = await supabase
       .from("owner_statements")
-      .select("id, status, owner_id, owner_payout, period_end")
+      .select(
+      "id, status, owner_id, owner_payout, period_end"
+    )
       .eq("id", statementId)
       .eq("organisation_id", organisationId)
       .maybeSingle();

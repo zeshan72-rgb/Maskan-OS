@@ -48,7 +48,9 @@ export async function recordPaymentAction(_prev: FormState, formData: FormData):
 
     const { data: lease } = await supabase
       .from("leases")
-      .select("id, tenant_id, lease_code")
+      .select(
+      "id, tenant_id, lease_code"
+    )
       .eq("id", input.lease_id)
       .eq("organisation_id", organisationId)
       .maybeSingle();
@@ -56,7 +58,9 @@ export async function recordPaymentAction(_prev: FormState, formData: FormData):
 
     const { data: outstanding } = await supabase
       .from("rent_instalments")
-      .select("id, outstanding_amount")
+      .select(
+      "id, outstanding_amount"
+    )
       .eq("lease_id", input.lease_id)
       .gt("outstanding_amount", 0)
       .order("due_date");
@@ -99,7 +103,9 @@ export async function recordPaymentAction(_prev: FormState, formData: FormData):
         confirmed_at: new Date().toISOString(),
         created_by: ctx.userId,
       })
-      .select("id")
+      .select(
+      "id"
+    )
       .single();
     if (error) throw error;
 
@@ -162,7 +168,9 @@ export async function confirmPaymentAction(
 
     const { data: payment } = await supabase
       .from("payments")
-      .select("id, lease_id, tenant_id, amount, status")
+      .select(
+      "id, lease_id, tenant_id, amount, status"
+    )
       .eq("id", paymentId)
       .eq("organisation_id", organisationId)
       .maybeSingle();
@@ -175,7 +183,9 @@ export async function confirmPaymentAction(
 
     const { data: outstanding } = await supabase
       .from("rent_instalments")
-      .select("id, outstanding_amount")
+      .select(
+      "id, outstanding_amount"
+    )
       .eq("lease_id", payment.lease_id)
       .gt("outstanding_amount", 0)
       .order("due_date");
@@ -237,7 +247,9 @@ export async function rejectPaymentAction(paymentId: string, reason: string): Pr
 
     const { data: payment } = await supabase
       .from("payments")
-      .select("id, tenant_id, status, lease_id")
+      .select(
+      "id, tenant_id, status, lease_id"
+    )
       .eq("id", paymentId)
       .eq("organisation_id", organisationId)
       .maybeSingle();
@@ -299,7 +311,9 @@ export async function submitPaymentProofAction(_prev: FormState, formData: FormD
     const supabase = await createClient();
     const { data: lease } = await supabase
       .from("leases")
-      .select("id, organisation_id, tenant_id")
+      .select(
+      "id, organisation_id, tenant_id"
+    )
       .eq("id", leaseId)
       .eq("tenant_id", membership.tenantId)
       .maybeSingle();
@@ -318,7 +332,9 @@ export async function submitPaymentProofAction(_prev: FormState, formData: FormD
         paid_at: paidAt || new Date().toISOString().slice(0, 10),
         created_by: ctx.userId,
       })
-      .select("id")
+      .select(
+      "id"
+    )
       .single();
     if (error) throw error;
 

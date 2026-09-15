@@ -21,7 +21,9 @@ export default async function VacancyPage() {
 
   const { data } = await supabase
     .from("units")
-    .select("id, unit_number, bedrooms, area_sqm, unit_type, market_rent, updated_at, properties ( id, name, address )")
+    .select(
+      "id, unit_number, bedrooms, area_sqm, unit_type, market_rent, updated_at, properties ( id, name, address )"
+    )
     .eq("organisation_id", membership.organisationId)
     .eq("status", "vacant")
     .is("archived_at", null)

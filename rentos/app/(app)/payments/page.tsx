@@ -28,7 +28,9 @@ export default async function PaymentsPage() {
   const [{ data: payments }, ageing] = await Promise.all([
     supabase
       .from("payments")
-      .select("id, amount, method, status, reference, payer_name, paid_at, created_at, leases ( id, lease_code ), tenants ( id, name )")
+      .select(
+      "id, amount, method, status, reference, payer_name, paid_at, created_at, leases ( id, lease_code ), tenants ( id, name )"
+    )
       .eq("organisation_id", membership.organisationId)
       .order("paid_at", { ascending: false })
       .limit(100),

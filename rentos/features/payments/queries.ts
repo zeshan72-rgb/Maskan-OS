@@ -51,8 +51,12 @@ export async function listPayments(params: {
   if (ids.length === 0) return { rows: [], total: count ?? 0, page };
 
   const [{ data: allocations }, { data: receipts }] = await Promise.all([
-    supabase.from("payment_allocations").select("payment_id, amount").in("payment_id", ids),
-    supabase.from("receipts").select("payment_id, receipt_number").in("payment_id", ids),
+    supabase.from("payment_allocations").select(
+      "payment_id, amount"
+    ).in("payment_id", ids),
+    supabase.from("receipts").select(
+      "payment_id, receipt_number"
+    ).in("payment_id", ids),
   ]);
 
   const allocatedByPayment = new Map<string, number>();
@@ -198,13 +202,17 @@ export async function getCheque(organisationId: string, chequeId: string): Promi
   const [{ data: events }, instalmentResult] = await Promise.all([
     supabase
       .from("cheque_events")
-      .select("id, from_status, to_status, notes, created_at")
+      .select(
+      "id, from_status, to_status, notes, created_at"
+    )
       .eq("cheque_id", chequeId)
       .order("created_at"),
     cheque.rent_instalment_id
       ? supabase
           .from("rent_instalments")
-          .select("id, instalment_number, due_date, outstanding_amount")
+          .select(
+      "id, instalment_number, due_date, outstanding_amount"
+    )
           .eq("id", cheque.rent_instalment_id)
           .maybeSingle()
       : Promise.resolve({ data: null }),
@@ -265,7 +273,9 @@ export async function getArrearsAgeing(organisationId: string): Promise<{
 
   const { data: instalments } = await supabase
     .from("rent_instalments")
-    .select("lease_id, due_date, outstanding_amount, leases ( tenants ( name ), properties ( name ), units ( unit_number ) )")
+    .select(
+      "lease_id, due_date, outstanding_amount, leases ( tenants ( name ), properties ( name ), units ( unit_number ) )"
+    )
     .eq("organisation_id", organisationId)
     .gt("outstanding_amount", 0)
     .order("due_date");

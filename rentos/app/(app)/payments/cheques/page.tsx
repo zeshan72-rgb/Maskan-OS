@@ -33,8 +33,7 @@ export default async function ChequesPage({
   let query = supabase
     .from("cheques")
     .select(
-      "id, cheque_number, bank_name, payer_name, amount, cheque_date, received_date, status, " +
-        "leases ( id, lease_code, tenants ( name ) )"
+      "id, cheque_number, bank_name, payer_name, amount, cheque_date, received_date, status, leases ( id, lease_code, tenants ( name ) )"
     )
     .eq("organisation_id", membership.organisationId)
     .order("cheque_date", { ascending: true });

@@ -5,6 +5,7 @@
 import "server-only";
 
 import { createServerClient } from "@supabase/ssr";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import type { Database } from "@/types/database";
 
@@ -52,7 +53,10 @@ export function createAdminClient() {
   if (typeof window !== "undefined") {
     throw new Error("createAdminClient must never be called from the browser");
   }
-  const { createClient: createSupabaseClient } = require("@supabase/supabase-js");
+  // A static import rather than require(): require() returns `any`, which
+  // silently discards the <Database> generic and left every admin query
+  // untyped. The browser guard above is what keeps the service-role key
+  // out of the client bundle, not the lazy require.
   return createSupabaseClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,

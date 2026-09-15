@@ -29,7 +29,9 @@ export default async function ExpensesPage({
     listExpenses({ organisationId: membership.organisationId, status, q }),
     getPropertyOptions(membership.organisationId),
     getVendorOptions(membership.organisationId),
-    supabase.from("expense_categories").select("id, name").is("organisation_id", null).order("name"),
+    supabase.from("expense_categories").select(
+      "id, name"
+    ).is("organisation_id", null).order("name"),
   ]);
 
   const pending = rows.filter((e) => e.approval_status === "pending");

@@ -22,8 +22,7 @@ export default async function TenantsPage() {
   const { data: tenants } = await supabase
     .from("tenants")
     .select(
-      "id, name, qid_or_passport, email, phone, employer, " +
-        "leases ( id, lease_code, status, units ( unit_number ), properties ( name ) )"
+      "id, name, qid_or_passport, email, phone, employer, leases ( id, lease_code, status, units ( unit_number ), properties ( name ) )"
     )
     .eq("organisation_id", membership.organisationId)
     .is("archived_at", null)

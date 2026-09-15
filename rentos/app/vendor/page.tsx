@@ -23,7 +23,9 @@ export default async function VendorPortalPage() {
     const supabase = await createClient();
     const { data } = await supabase
       .from("vendor_members")
-      .select("vendor_id")
+      .select(
+      "vendor_id"
+    )
       .eq("profile_id", ctx.userId)
       .eq("is_active", true)
       .limit(1);

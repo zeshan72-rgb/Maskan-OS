@@ -45,11 +45,19 @@ export async function createOrganisationAction(
       .insert({
         name: parsed.data.name,
         legal_name: parsed.data.legal_name ?? null,
-        country: parsed.data.country,
+        // slug is NOT NULL with no default. The correct types surfaced this;
+        // previously the insert would have failed at runtime instead.
+        slug: parsed.data.name
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "")
+          .slice(0, 48),
         currency: parsed.data.currency,
         onboarding_step: "portfolio",
       })
-      .select("id")
+      .select(
+      "id"
+    )
       .single();
     if (orgError) throw orgError;
 
@@ -57,7 +65,9 @@ export async function createOrganisationAction(
     // organisation it cannot reach.
     const { data: ownerRole } = await supabase
       .from("roles")
-      .select("id")
+      .select(
+      "id"
+    )
       .eq("key", "org_owner")
       .is("organisation_id", null)
       .single();
@@ -65,7 +75,9 @@ export async function createOrganisationAction(
     const { data: member, error: memberError } = await supabase
       .from("organisation_members")
       .insert({ organisation_id: org.id, profile_id: auth.user.id, is_active: true })
-      .select("id")
+      .select(
+      "id"
+    )
       .single();
     if (memberError) throw memberError;
 

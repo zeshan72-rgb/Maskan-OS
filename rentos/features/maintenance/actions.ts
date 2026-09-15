@@ -9,6 +9,7 @@ import { parseForm, toSafeError, type FormState } from "@/lib/utils/form-state";
 import { recordAudit } from "@/lib/utils/audit";
 import { notify } from "@/features/notifications/service";
 import type { MaintenanceStatus } from "@/types/database";
+import type { Database } from "@/types/database";
 
 async function currentOrganisationId(): Promise<string> {
   const ctx = await getSessionContext();
@@ -53,7 +54,9 @@ export async function createMaintenanceRequestAction(_prev: FormState, formData:
     // one of their own active leases.
     let leaseQuery = supabase
       .from("leases")
-      .select("id, property_id, unit_id, tenant_id")
+      .select(
+      "id, property_id, unit_id, tenant_id"
+    )
       .eq("organisation_id", organisationId)
       .eq("unit_id", input.unit_id)
       .in("status", ["active", "expiring", "renewal_offered"]);
@@ -71,7 +74,9 @@ export async function createMaintenanceRequestAction(_prev: FormState, formData:
     if (!propertyId) {
       const { data: unit } = await supabase
         .from("units")
-        .select("property_id")
+        .select(
+      "property_id"
+    )
         .eq("id", input.unit_id)
         .eq("organisation_id", organisationId)
         .maybeSingle();
@@ -98,7 +103,9 @@ export async function createMaintenanceRequestAction(_prev: FormState, formData:
         status: "submitted",
         created_by: ctx.userId,
       })
-      .select("id")
+      .select(
+      "id"
+    )
       .single();
     if (error) throw error;
 
@@ -138,7 +145,9 @@ export async function createWorkOrderAction(_prev: FormState, formData: FormData
 
     const { data: request } = await supabase
       .from("maintenance_requests")
-      .select("id, request_code, status")
+      .select(
+      "id, request_code, status"
+    )
       .eq("id", input.maintenance_request_id)
       .eq("organisation_id", organisationId)
       .maybeSingle();
@@ -158,7 +167,9 @@ export async function createWorkOrderAction(_prev: FormState, formData: FormData
         status: input.scheduled_at ? "scheduled" : "assigned",
         created_by: ctx.userId,
       })
-      .select("id")
+      .select(
+      "id"
+    )
       .single();
     if (error) throw error;
 
@@ -210,7 +221,9 @@ export async function updateMaintenanceStatusAction(
 
     const { data: request } = await supabase
       .from("maintenance_requests")
-      .select("id, request_code, tenant_id, status")
+      .select(
+      "id, request_code, tenant_id, status"
+    )
       .eq("id", requestId)
       .eq("organisation_id", organisationId)
       .maybeSingle();
@@ -321,7 +334,9 @@ export async function vendorUpdateJobAction(
 
     const { data: workOrder } = await supabase
       .from("work_orders")
-      .select("id, vendor_id, organisation_id, maintenance_request_id, status")
+      .select(
+      "id, vendor_id, organisation_id, maintenance_request_id, status"
+    )
       .eq("id", workOrderId)
       .maybeSingle();
 
@@ -330,7 +345,7 @@ export async function vendorUpdateJobAction(
     }
 
     const nextStatus = VENDOR_EVENT_STATUS[event];
-    const updates: Record<string, unknown> = {};
+    const updates: Database["public"]["Tables"]["work_orders"]["Update"] = {};
     if (nextStatus) updates.status = nextStatus;
     if (event === "scheduled" && payload.scheduledAt) {
       updates.scheduled_at = new Date(payload.scheduledAt).toISOString();

@@ -42,7 +42,9 @@ export async function listOwners(params: {
   if (ids.length === 0) return { rows: [], total: count ?? 0, page };
 
   // Batched count of properties per owner — one query, not one per row.
-  const { data: links } = await supabase.from("property_owners").select("owner_id").in("owner_id", ids);
+  const { data: links } = await supabase.from("property_owners").select(
+      "owner_id"
+    ).in("owner_id", ids);
   const counts = new Map<string, number>();
   for (const link of links ?? []) counts.set(link.owner_id, (counts.get(link.owner_id) ?? 0) + 1);
 
@@ -72,7 +74,9 @@ export async function getOwner(organisationId: string, ownerId: string): Promise
 
   const { data: owner } = await supabase
     .from("owners")
-    .select("id, organisation_id, name, kind, qid_or_cr, email, phone, address, notes")
+    .select(
+      "id, organisation_id, name, kind, qid_or_cr, email, phone, address, notes"
+    )
     .eq("id", ownerId)
     .eq("organisation_id", organisationId)
     .is("archived_at", null)
@@ -82,7 +86,9 @@ export async function getOwner(organisationId: string, ownerId: string): Promise
 
   const { data: links } = await supabase
     .from("property_owners")
-    .select("ownership_percentage, properties ( id, name, property_code )")
+    .select(
+      "ownership_percentage, properties ( id, name, property_code )"
+    )
     .eq("owner_id", ownerId);
 
   const properties = (links ?? [])
@@ -98,8 +104,12 @@ export async function getOwner(organisationId: string, ownerId: string): Promise
   let monthlyRent = 0;
   if (propertyIds.length > 0) {
     const [{ data: unitRows }, { data: leaseRows }] = await Promise.all([
-      supabase.from("units").select("status").in("property_id", propertyIds).is("archived_at", null),
-      supabase.from("leases").select("monthly_rent").in("property_id", propertyIds).eq("status", "active"),
+      supabase.from("units").select(
+      "status"
+    ).in("property_id", propertyIds).is("archived_at", null),
+      supabase.from("leases").select(
+      "monthly_rent"
+    ).in("property_id", propertyIds).eq("status", "active"),
     ]);
     units = unitRows ?? [];
     monthlyRent = (leaseRows ?? []).reduce((sum, l) => sum + Number(l.monthly_rent ?? 0), 0);
@@ -159,7 +169,9 @@ export async function listTenants(params: {
 
   const { data: leases } = await supabase
     .from("leases")
-    .select("id, tenant_id, status, units ( unit_number ), properties ( name )")
+    .select(
+      "id, tenant_id, status, units ( unit_number ), properties ( name )"
+    )
     .in("tenant_id", ids)
     .in("status", ["active", "expiring", "renewal_offered", "pending"]);
 
@@ -221,7 +233,9 @@ export async function getTenant(organisationId: string, tenantId: string): Promi
 
   const { data: tenant } = await supabase
     .from("tenants")
-    .select("id, organisation_id, name, qid_or_passport, nationality, email, phone, employer, emergency_contact_name, emergency_contact_phone, notes")
+    .select(
+      "id, organisation_id, name, qid_or_passport, nationality, email, phone, employer, emergency_contact_name, emergency_contact_phone, notes"
+    )
     .eq("id", tenantId)
     .eq("organisation_id", organisationId)
     .is("archived_at", null)
@@ -230,10 +244,14 @@ export async function getTenant(organisationId: string, tenantId: string): Promi
   if (!tenant) return null;
 
   const [{ data: occupants }, { data: leases }] = await Promise.all([
-    supabase.from("occupants").select("id, name, relationship").eq("tenant_id", tenantId),
+    supabase.from("occupants").select(
+      "id, name, relationship"
+    ).eq("tenant_id", tenantId),
     supabase
       .from("leases")
-      .select("id, lease_code, status, start_date, end_date, monthly_rent, units ( unit_number ), properties ( name )")
+      .select(
+      "id, lease_code, status, start_date, end_date, monthly_rent, units ( unit_number ), properties ( name )"
+    )
       .eq("tenant_id", tenantId)
       .order("start_date", { ascending: false }),
   ]);

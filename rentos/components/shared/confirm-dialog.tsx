@@ -21,6 +21,7 @@ export function ConfirmDialog({
   destructive = true,
   action,
   onDone,
+  children,
 }: {
   trigger: React.ReactNode;
   title: string;
@@ -29,6 +30,8 @@ export function ConfirmDialog({
   destructive?: boolean;
   action: () => Promise<FormState>;
   onDone?: () => void;
+  /** Extra fields rendered inside the dialog, above the buttons. */
+  children?: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -54,6 +57,8 @@ export function ConfirmDialog({
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
+
+        {children}
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)} disabled={isPending}>
             Cancel

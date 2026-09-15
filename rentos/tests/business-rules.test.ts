@@ -189,8 +189,6 @@ function makeContext(overrides: Partial<SessionContext> = {}): SessionContext {
         organisationMemberId: "m-a",
         organisationName: "Org A",
         organisationSlug: "org-a",
-        organisationStatus: "active",
-        onboardingStep: "complete",
         roleKeys: ["property_manager"],
         permissionCodes: ["properties.manage", "tenants.manage", "leases.manage"],
         ownerId: null,

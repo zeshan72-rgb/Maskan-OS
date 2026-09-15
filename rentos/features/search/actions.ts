@@ -56,7 +56,9 @@ export async function globalSearch(term: string): Promise<SearchGroup[]> {
   const [tenants, properties, units, owners, leases, cheques, payments, maintenance] = await Promise.all([
     supabase
       .from("tenants")
-      .select("id, name, phone, qid_or_passport, email")
+      .select(
+      "id, name, phone, qid_or_passport, email"
+    )
       .eq("organisation_id", organisationId)
       .is("archived_at", null)
       .or(`name.ilike.${pattern},phone.ilike.${pattern},qid_or_passport.ilike.${pattern},email.ilike.${pattern}`)
@@ -64,7 +66,9 @@ export async function globalSearch(term: string): Promise<SearchGroup[]> {
 
     supabase
       .from("properties")
-      .select("id, name, property_code, address")
+      .select(
+      "id, name, property_code, address"
+    )
       .eq("organisation_id", organisationId)
       .is("archived_at", null)
       .or(`name.ilike.${pattern},property_code.ilike.${pattern},address.ilike.${pattern}`)
@@ -72,7 +76,9 @@ export async function globalSearch(term: string): Promise<SearchGroup[]> {
 
     supabase
       .from("units")
-      .select("id, unit_number, property_id, status, properties ( name )")
+      .select(
+      "id, unit_number, property_id, status, properties ( name )"
+    )
       .eq("organisation_id", organisationId)
       .is("archived_at", null)
       .ilike("unit_number", pattern)
@@ -80,7 +86,9 @@ export async function globalSearch(term: string): Promise<SearchGroup[]> {
 
     supabase
       .from("owners")
-      .select("id, name, qid_or_cr, phone, email")
+      .select(
+      "id, name, qid_or_cr, phone, email"
+    )
       .eq("organisation_id", organisationId)
       .is("archived_at", null)
       .or(`name.ilike.${pattern},qid_or_cr.ilike.${pattern},phone.ilike.${pattern},email.ilike.${pattern}`)
@@ -88,28 +96,36 @@ export async function globalSearch(term: string): Promise<SearchGroup[]> {
 
     supabase
       .from("leases")
-      .select("id, lease_code, status, tenants ( name ), units ( unit_number )")
+      .select(
+      "id, lease_code, status, tenants ( name ), units ( unit_number )"
+    )
       .eq("organisation_id", organisationId)
       .ilike("lease_code", pattern)
       .limit(PER_ENTITY_LIMIT),
 
     supabase
       .from("cheques")
-      .select("id, cheque_number, bank_name, amount, status")
+      .select(
+      "id, cheque_number, bank_name, amount, status"
+    )
       .eq("organisation_id", organisationId)
       .or(`cheque_number.ilike.${pattern},bank_name.ilike.${pattern},payer_name.ilike.${pattern}`)
       .limit(PER_ENTITY_LIMIT),
 
     supabase
       .from("payments")
-      .select("id, reference, amount, paid_at, lease_id")
+      .select(
+      "id, reference, amount, paid_at, lease_id"
+    )
       .eq("organisation_id", organisationId)
       .ilike("reference", pattern)
       .limit(PER_ENTITY_LIMIT),
 
     supabase
       .from("maintenance_requests")
-      .select("id, request_code, description, status")
+      .select(
+      "id, request_code, description, status"
+    )
       .eq("organisation_id", organisationId)
       .or(`request_code.ilike.${pattern},description.ilike.${pattern}`)
       .limit(PER_ENTITY_LIMIT),

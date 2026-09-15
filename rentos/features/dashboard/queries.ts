@@ -45,19 +45,29 @@ export async function getDashboardData(organisationId: string): Promise<Dashboar
   ] = await Promise.all([
     supabase.from("properties").select("id", { count: "exact", head: true })
       .eq("organisation_id", organisationId).is("archived_at", null),
-    supabase.from("units").select("status")
+    supabase.from("units").select(
+      "status"
+    )
       .eq("organisation_id", organisationId).is("archived_at", null),
-    supabase.from("leases").select("id, status, end_date")
+    supabase.from("leases").select(
+      "id, status, end_date"
+    )
       .eq("organisation_id", organisationId).in("status", ["active", "expiring", "renewal_offered"]),
-    supabase.from("rent_instalments").select("due_date, original_amount, outstanding_amount, status")
+    supabase.from("rent_instalments").select(
+      "due_date, original_amount, outstanding_amount, status"
+    )
       .eq("organisation_id", organisationId)
       .gte("due_date", trendStart.toISOString().slice(0, 10))
       .lte("due_date", monthEnd.toISOString().slice(0, 10)),
     supabase.from("maintenance_requests")
-      .select("id, status, priority, created_at, maintenance_categories ( name )")
+      .select(
+      "id, status, priority, created_at, maintenance_categories ( name )"
+    )
       .eq("organisation_id", organisationId)
       .not("status", "in", "(closed,cancelled)"),
-    supabase.from("cheques").select("id, status, cheque_date")
+    supabase.from("cheques").select(
+      "id, status, cheque_date"
+    )
       .eq("organisation_id", organisationId).in("status", ["received", "stored", "due_soon", "submitted", "bounced"]),
   ]);
 

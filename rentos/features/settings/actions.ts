@@ -89,7 +89,9 @@ export async function inviteMemberAction(_prev: FormState, formData: FormData): 
 
     const { data: role } = await supabase
       .from("roles")
-      .select("id, key, name, organisation_id")
+      .select(
+      "id, key, name, organisation_id"
+    )
       .eq("id", parsed.data.role_id)
       .maybeSingle();
 
@@ -103,7 +105,9 @@ export async function inviteMemberAction(_prev: FormState, formData: FormData): 
 
     const { data: existing } = await supabase
       .from("invitations")
-      .select("id")
+      .select(
+      "id"
+    )
       .eq("organisation_id", organisationId)
       .eq("email", parsed.data.email)
       .eq("status", "pending")
@@ -121,7 +125,9 @@ export async function inviteMemberAction(_prev: FormState, formData: FormData): 
         role_id: parsed.data.role_id,
         invited_by: ctx.userId,
       })
-      .select("id, token")
+      .select(
+      "id, token"
+    )
       .single();
     if (error) throw error;
 
@@ -174,7 +180,9 @@ export async function addBankAccountAction(_prev: FormState, formData: FormData)
         iban: parsed.data.iban ?? null,
         is_default: parsed.data.is_default,
       })
-      .select("id")
+      .select(
+      "id"
+    )
       .single();
     if (error) throw error;
 

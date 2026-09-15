@@ -64,7 +64,9 @@ export async function listLeases(params: {
   // Batched outstanding balance per lease.
   const { data: instalments } = await supabase
     .from("rent_instalments")
-    .select("lease_id, outstanding_amount")
+    .select(
+      "lease_id, outstanding_amount"
+    )
     .in("lease_id", ids);
 
   const outstandingByLease = new Map<string, number>();
@@ -161,17 +163,23 @@ export async function getLease(organisationId: string, leaseId: string): Promise
   const [{ data: instalments }, { data: events }, { data: offers }] = await Promise.all([
     supabase
       .from("rent_instalments")
-      .select("id, instalment_number, due_date, original_amount, outstanding_amount, status")
+      .select(
+      "id, instalment_number, due_date, original_amount, outstanding_amount, status"
+    )
       .eq("lease_id", leaseId)
       .order("instalment_number"),
     supabase
       .from("lease_events")
-      .select("id, event_type, notes, created_at")
+      .select(
+      "id, event_type, notes, created_at"
+    )
       .eq("lease_id", leaseId)
       .order("created_at", { ascending: false }),
     supabase
       .from("lease_renewal_offers")
-      .select("id, new_start_date, new_end_date, new_monthly_rent, status, created_at")
+      .select(
+      "id, new_start_date, new_end_date, new_monthly_rent, status, created_at"
+    )
       .eq("lease_id", leaseId)
       .order("created_at", { ascending: false }),
   ]);
@@ -185,7 +193,9 @@ export async function getLease(organisationId: string, leaseId: string): Promise
   if (instalmentIds.length > 0) {
     const { data: allocations } = await supabase
       .from("payment_allocations")
-      .select("rent_instalment_id, amount, payment_id")
+      .select(
+      "rent_instalment_id, amount, payment_id"
+    )
       .in("rent_instalment_id", instalmentIds);
 
     const paymentIds = Array.from(new Set((allocations ?? []).map((a) => a.payment_id)));
@@ -193,7 +203,9 @@ export async function getLease(organisationId: string, leaseId: string): Promise
     if (paymentIds.length > 0) {
       const { data: payments } = await supabase
         .from("payments")
-        .select("id, reference, paid_at")
+        .select(
+      "id, reference, paid_at"
+    )
         .in("id", paymentIds);
       for (const p of payments ?? []) paymentMeta.set(p.id, { reference: p.reference, paid_at: p.paid_at });
     }
@@ -263,7 +275,9 @@ export async function getLeasableUnits(organisationId: string, propertyId?: stri
   const supabase = await createClient();
   let query = supabase
     .from("units")
-    .select("id, unit_number, property_id, current_rent, market_rent, status, bedrooms")
+    .select(
+      "id, unit_number, property_id, current_rent, market_rent, status, bedrooms"
+    )
     .eq("organisation_id", organisationId)
     .is("archived_at", null)
     .in("status", ["vacant", "reserved"]);
@@ -278,7 +292,9 @@ export async function getTenantOptions(organisationId: string) {
   const supabase = await createClient();
   const { data } = await supabase
     .from("tenants")
-    .select("id, name, phone")
+    .select(
+      "id, name, phone"
+    )
     .eq("organisation_id", organisationId)
     .is("archived_at", null)
     .order("name");
@@ -290,7 +306,9 @@ export async function getOutstandingInstalments(organisationId: string, leaseId:
   const supabase = await createClient();
   const { data } = await supabase
     .from("rent_instalments")
-    .select("id, instalment_number, due_date, original_amount, outstanding_amount, status")
+    .select(
+      "id, instalment_number, due_date, original_amount, outstanding_amount, status"
+    )
     .eq("organisation_id", organisationId)
     .eq("lease_id", leaseId)
     .gt("outstanding_amount", 0)

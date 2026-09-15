@@ -34,8 +34,12 @@ export async function getOwnerPortalSummary(
   const periodEnd = period?.end ?? new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().slice(0, 10);
 
   const [{ data: owner }, { data: links }] = await Promise.all([
-    supabase.from("owners").select("name").eq("id", ownerId).maybeSingle(),
-    supabase.from("property_owners").select("property_id, properties ( id, name, address )").eq("owner_id", ownerId),
+    supabase.from("owners").select(
+      "name"
+    ).eq("id", ownerId).maybeSingle(),
+    supabase.from("property_owners").select(
+      "property_id, properties ( id, name, address )"
+    ).eq("owner_id", ownerId),
   ]);
 
   const properties = (links ?? [])
@@ -60,18 +64,26 @@ export async function getOwnerPortalSummary(
   }
 
   const [{ data: units }, { data: leases }, { data: expenses }, { data: maintenance }] = await Promise.all([
-    supabase.from("units").select("id, property_id, status").in("property_id", propertyIds).is("archived_at", null),
-    supabase.from("leases").select("id, property_id, monthly_rent, status").in("property_id", propertyIds),
+    supabase.from("units").select(
+      "id, property_id, status"
+    ).in("property_id", propertyIds).is("archived_at", null),
+    supabase.from("leases").select(
+      "id, property_id, monthly_rent, status"
+    ).in("property_id", propertyIds),
     supabase
       .from("property_expenses")
-      .select("amount, property_id, category_id, expense_categories ( name )")
+      .select(
+      "amount, property_id, category_id, expense_categories ( name )"
+    )
       .in("property_id", propertyIds)
       .gte("expense_date", periodStart)
       .lte("expense_date", periodEnd)
       .eq("approval_status", "approved"),
     supabase
       .from("maintenance_requests")
-      .select("id")
+      .select(
+      "id"
+    )
       .in("property_id", propertyIds)
       .not("status", "in", "(closed,cancelled)"),
   ]);
@@ -85,7 +97,9 @@ export async function getOwnerPortalSummary(
   if (leaseIds.length > 0) {
     const { data: instalments } = await supabase
       .from("rent_instalments")
-      .select("original_amount, outstanding_amount, due_date")
+      .select(
+      "original_amount, outstanding_amount, due_date"
+    )
       .in("lease_id", leaseIds)
       .gte("due_date", periodStart)
       .lte("due_date", periodEnd);
@@ -164,13 +178,17 @@ export async function getOwnerStatements(organisationId: string, ownerId: string
 export async function getOwnerMaintenance(ownerId: string) {
   const supabase = await createClient();
 
-  const { data: links } = await supabase.from("property_owners").select("property_id").eq("owner_id", ownerId);
+  const { data: links } = await supabase.from("property_owners").select(
+      "property_id"
+    ).eq("owner_id", ownerId);
   const propertyIds = (links ?? []).map((l) => l.property_id);
   if (propertyIds.length === 0) return [];
 
   const { data } = await supabase
     .from("maintenance_requests")
-    .select("id, request_code, description, priority, status, created_at, properties ( name ), units ( unit_number )")
+    .select(
+      "id, request_code, description, priority, status, created_at, properties ( name ), units ( unit_number )"
+    )
     .in("property_id", propertyIds)
     .order("created_at", { ascending: false })
     .limit(50);
@@ -196,7 +214,9 @@ export async function getOwnerFinancials(ownerId: string) {
 
   const { data } = await supabase
     .from("owner_transactions")
-    .select("id, transaction_type, amount, transaction_date, notes, properties ( name )")
+    .select(
+      "id, transaction_type, amount, transaction_date, notes, properties ( name )"
+    )
     .eq("owner_id", ownerId)
     .order("transaction_date", { ascending: false })
     .limit(100);

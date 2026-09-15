@@ -1,4 +1,4 @@
-import { ZodError, type ZodSchema } from "zod";
+import { z, type ZodError, type ZodTypeAny } from "zod";
 import { PermissionError } from "@/lib/permissions/errors";
 
 export interface FormState {
@@ -11,15 +11,23 @@ export interface FormState {
 
 export const IDLE_STATE: FormState = { status: "idle" };
 
-export function fieldErrorsFrom(error: ZodError): Record<string, string> {
-  const flat = error.flatten().fieldErrors;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function fieldErrorsFrom(error: ZodError<any>): Record<string, string> {
+  const flat = error.flatten().fieldErrors as Record<string, string[] | undefined>;
   return Object.fromEntries(
     Object.entries(flat).map(([key, messages]) => [key, messages?.[0] ?? "Invalid value"])
   );
 }
 
-export function parseForm<T>(schema: ZodSchema<T>, formData: FormData):
-  | { ok: true; data: T }
+/**
+ * ZodSchema<T> is ZodType<T, ZodTypeDef, T>, which forces the input and
+ * output types to be the same. Any schema using z.coerce or z.preprocess
+ * has an `unknown` input and a narrow output, so T could not unify and
+ * every parsed field collapsed to {}. Inferring z.output<S> from the schema
+ * itself keeps the output type the caller actually wants.
+ */
+export function parseForm<S extends ZodTypeAny>(schema: S, formData: FormData):
+  | { ok: true; data: z.output<S> }
   | { ok: false; state: FormState } {
   const raw = Object.fromEntries(formData.entries());
   const parsed = schema.safeParse(raw);

@@ -34,7 +34,9 @@ export async function getTenantHome(organisationId: string, tenantId: string): P
   const supabase = await createClient();
 
   const [{ data: tenant }, { data: leases }] = await Promise.all([
-    supabase.from("tenants").select("name").eq("id", tenantId).maybeSingle(),
+    supabase.from("tenants").select(
+      "name"
+    ).eq("id", tenantId).maybeSingle(),
     supabase
       .from("leases")
       .select(
@@ -69,7 +71,9 @@ export async function getTenantHome(organisationId: string, tenantId: string): P
     await Promise.all([
       supabase
         .from("rent_instalments")
-        .select("id, due_date, original_amount, outstanding_amount, status")
+        .select(
+      "id, due_date, original_amount, outstanding_amount, status"
+    )
         .eq("lease_id", leaseRow.id)
         .order("due_date"),
       supabase
@@ -84,7 +88,9 @@ export async function getTenantHome(organisationId: string, tenantId: string): P
         .eq("status", "pending_verification"),
       supabase
         .from("bank_accounts")
-        .select("bank_name, account_name, iban")
+        .select(
+      "bank_name, account_name, iban"
+    )
         .eq("organisation_id", organisationId)
         .eq("is_default", true)
         .limit(1),
@@ -143,7 +149,9 @@ export async function getTenantRentSchedule(tenantId: string) {
 
   const { data: leases } = await supabase
     .from("leases")
-    .select("id")
+    .select(
+      "id"
+    )
     .eq("tenant_id", tenantId)
     .in("status", ["active", "expiring", "renewal_offered", "pending"]);
 
@@ -152,7 +160,9 @@ export async function getTenantRentSchedule(tenantId: string) {
 
   const { data } = await supabase
     .from("rent_instalments")
-    .select("id, instalment_number, due_date, original_amount, outstanding_amount, status")
+    .select(
+      "id, instalment_number, due_date, original_amount, outstanding_amount, status"
+    )
     .in("lease_id", leaseIds)
     .order("due_date");
 
@@ -179,7 +189,9 @@ export async function getTenantPayments(tenantId: string): Promise<TenantPayment
 
   const { data: payments } = await supabase
     .from("payments")
-    .select("id, amount, method, status, reference, paid_at, rejected_reason")
+    .select(
+      "id, amount, method, status, reference, paid_at, rejected_reason"
+    )
     .eq("tenant_id", tenantId)
     .order("paid_at", { ascending: false });
 
@@ -188,7 +200,9 @@ export async function getTenantPayments(tenantId: string): Promise<TenantPayment
   if (ids.length > 0) {
     const { data: receipts } = await supabase
       .from("receipts")
-      .select("payment_id, receipt_number")
+      .select(
+      "payment_id, receipt_number"
+    )
       .in("payment_id", ids);
     for (const r of receipts ?? []) receiptByPayment.set(r.payment_id, r.receipt_number);
   }
@@ -221,7 +235,9 @@ export async function getTenantMaintenance(tenantId: string): Promise<TenantMain
 
   const { data: requests } = await supabase
     .from("maintenance_requests")
-    .select("id, request_code, description, priority, status, created_at, maintenance_categories ( name )")
+    .select(
+      "id, request_code, description, priority, status, created_at, maintenance_categories ( name )"
+    )
     .eq("tenant_id", tenantId)
     .order("created_at", { ascending: false });
 
@@ -232,7 +248,9 @@ export async function getTenantMaintenance(tenantId: string): Promise<TenantMain
     // enforced by RLS as well as this filter.
     const { data: comments } = await supabase
       .from("maintenance_comments")
-      .select("maintenance_request_id, body, created_at")
+      .select(
+      "maintenance_request_id, body, created_at"
+    )
       .in("maintenance_request_id", ids)
       .eq("is_internal", false)
       .order("created_at", { ascending: false });
@@ -264,7 +282,9 @@ export async function getTenantRenewalOffer(tenantId: string) {
 
   const { data: leases } = await supabase
     .from("leases")
-    .select("id")
+    .select(
+      "id"
+    )
     .eq("tenant_id", tenantId)
     .in("status", ["active", "expiring", "renewal_offered"]);
 
@@ -273,7 +293,9 @@ export async function getTenantRenewalOffer(tenantId: string) {
 
   const { data } = await supabase
     .from("lease_renewal_offers")
-    .select("id, new_start_date, new_end_date, new_monthly_rent, new_security_deposit, notes, status")
+    .select(
+      "id, new_start_date, new_end_date, new_monthly_rent, new_security_deposit, notes, status"
+    )
     .in("lease_id", leaseIds)
     .eq("status", "pending")
     .order("created_at", { ascending: false })
@@ -295,10 +317,14 @@ export async function getTenantDocuments(tenantId: string) {
   const [{ data: tenantDocs }, { data: leases }] = await Promise.all([
     supabase
       .from("tenant_documents")
-      .select("id, title, category, storage_path, created_at")
+      .select(
+      "id, title, category, storage_path, created_at"
+    )
       .eq("tenant_id", tenantId)
       .order("created_at", { ascending: false }),
-    supabase.from("leases").select("id").eq("tenant_id", tenantId),
+    supabase.from("leases").select(
+      "id"
+    ).eq("tenant_id", tenantId),
   ]);
 
   const leaseIds = (leases ?? []).map((l) => l.id);
@@ -306,7 +332,9 @@ export async function getTenantDocuments(tenantId: string) {
   if (leaseIds.length > 0) {
     const { data } = await supabase
       .from("lease_documents")
-      .select("id, title, storage_path, created_at")
+      .select(
+      "id, title, storage_path, created_at"
+    )
       .in("lease_id", leaseIds)
       .order("created_at", { ascending: false });
     leaseDocs = data ?? [];
@@ -323,7 +351,9 @@ export async function getTenantUnits(tenantId: string) {
   const supabase = await createClient();
   const { data } = await supabase
     .from("leases")
-    .select("unit_id, units ( unit_number ), properties ( name )")
+    .select(
+      "unit_id, units ( unit_number ), properties ( name )"
+    )
     .eq("tenant_id", tenantId)
     .in("status", ["active", "expiring", "renewal_offered"]);
 

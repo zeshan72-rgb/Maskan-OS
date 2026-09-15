@@ -30,7 +30,7 @@ export async function markAllNotificationsReadAction(): Promise<FormState> {
 
     const { error } = await supabase
       .from("notifications")
-      .update({ is_read: true, read_at: new Date().toISOString() })
+      .update({ is_read: true })
       .eq("profile_id", auth.user.id)
       .eq("is_read", false);
     if (error) throw error;

@@ -86,7 +86,9 @@ export default async function TenantPortalPage() {
       getTenantRenewalOffer(tenantId),
       getTenantDocuments(tenantId),
       getTenantUnits(tenantId),
-      supabase.from("maintenance_categories").select("id, name").is("organisation_id", null).order("name"),
+      supabase.from("maintenance_categories").select(
+      "id, name"
+    ).is("organisation_id", null).order("name"),
     ]);
 
   return (

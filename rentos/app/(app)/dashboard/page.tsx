@@ -24,7 +24,9 @@ export default async function DashboardPage() {
     getDashboardData(membership.organisationId),
     supabase
       .from("organisation_subscriptions")
-      .select("current_period_end, plans ( name, max_units, max_users )")
+      .select(
+      "current_period_end, plans ( name, max_units, max_users )"
+    )
       .eq("organisation_id", membership.organisationId)
       .maybeSingle(),
     supabase

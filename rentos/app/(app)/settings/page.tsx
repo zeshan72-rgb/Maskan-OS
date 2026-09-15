@@ -43,7 +43,9 @@ export default async function SettingsPage() {
   const supabase = await createClient();
   const [settings, { data: roles }] = await Promise.all([
     getOrganisationSettings(membership.organisationId),
-    supabase.from("roles").select("id, key, name").is("organisation_id", null).order("name"),
+    supabase.from("roles").select(
+      "id, key, name"
+    ).is("organisation_id", null).order("name"),
   ]);
 
   // Integration status is read from the server environment, never from the

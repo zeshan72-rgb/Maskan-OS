@@ -58,8 +58,12 @@ export async function listProperties(params: PropertyListParams): Promise<{
   if (ids.length === 0) return { rows: [], total: count ?? 0, page };
 
   const [{ data: units }, { data: owners }] = await Promise.all([
-    supabase.from("units").select("property_id, status").in("property_id", ids).is("archived_at", null),
-    supabase.from("property_owners").select("property_id, owners ( name )").in("property_id", ids),
+    supabase.from("units").select(
+      "property_id, status"
+    ).in("property_id", ids).is("archived_at", null),
+    supabase.from("property_owners").select(
+      "property_id, owners ( name )"
+    ).in("property_id", ids),
   ]);
 
   const unitCounts = new Map<string, { total: number; occupied: number }>();
@@ -116,7 +120,9 @@ export async function getProperty(organisationId: string, propertyId: string): P
 
   const { data: property } = await supabase
     .from("properties")
-    .select("id, organisation_id, name, property_code, type, address, description, latitude, longitude, management_fee_type, management_fee_value")
+    .select(
+      "id, organisation_id, name, property_code, type, address, description, latitude, longitude, management_fee_type, management_fee_value"
+    )
     .eq("id", propertyId)
     .eq("organisation_id", organisationId)
     .is("archived_at", null)
@@ -125,9 +131,15 @@ export async function getProperty(organisationId: string, propertyId: string): P
   if (!property) return null;
 
   const [{ data: owners }, { data: units }, { data: leases }] = await Promise.all([
-    supabase.from("property_owners").select("ownership_percentage, owners ( id, name )").eq("property_id", propertyId),
-    supabase.from("units").select("id, status").eq("property_id", propertyId).is("archived_at", null),
-    supabase.from("leases").select("id, monthly_rent, status").eq("property_id", propertyId).eq("status", "active"),
+    supabase.from("property_owners").select(
+      "ownership_percentage, owners ( id, name )"
+    ).eq("property_id", propertyId),
+    supabase.from("units").select(
+      "id, status"
+    ).eq("property_id", propertyId).is("archived_at", null),
+    supabase.from("leases").select(
+      "id, monthly_rent, status"
+    ).eq("property_id", propertyId).eq("status", "active"),
   ]);
 
   const unitRows = units ?? [];
@@ -175,7 +187,9 @@ export async function listUnitsForProperty(
 
   let query = supabase
     .from("units")
-    .select("id, unit_number, floor, bedrooms, bathrooms, area_sqm, unit_type, furnishing, current_rent, market_rent, status")
+    .select(
+      "id, unit_number, floor, bedrooms, bathrooms, area_sqm, unit_type, furnishing, current_rent, market_rent, status"
+    )
     .eq("organisation_id", organisationId)
     .eq("property_id", propertyId)
     .is("archived_at", null);
@@ -192,7 +206,9 @@ export async function listUnitsForProperty(
   // Batched: one query for all active leases on this page of units.
   const { data: leases } = await supabase
     .from("leases")
-    .select("id, unit_id, tenants ( name )")
+    .select(
+      "id, unit_id, tenants ( name )"
+    )
     .in("unit_id", unitIds)
     .eq("status", "active");
 
@@ -214,7 +230,9 @@ export async function getPropertyOptions(organisationId: string) {
   const supabase = await createClient();
   const { data } = await supabase
     .from("properties")
-    .select("id, name, property_code")
+    .select(
+      "id, name, property_code"
+    )
     .eq("organisation_id", organisationId)
     .is("archived_at", null)
     .order("name");
@@ -225,7 +243,9 @@ export async function getOwnerOptions(organisationId: string) {
   const supabase = await createClient();
   const { data } = await supabase
     .from("owners")
-    .select("id, name")
+    .select(
+      "id, name"
+    )
     .eq("organisation_id", organisationId)
     .is("archived_at", null)
     .order("name");

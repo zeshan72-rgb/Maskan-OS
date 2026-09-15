@@ -6,14 +6,10 @@ const optionalString = z
   .optional()
   .transform((v) => (v === "" ? undefined : v));
 
-const optionalMoney = z
-  .union([z.string(), z.number()])
-  .optional()
-  .transform((v) => {
-    if (v === undefined || v === "" || v === null) return undefined;
-    const n = typeof v === "number" ? v : Number(v);
-    return Number.isFinite(n) ? n : undefined;
-  });
+const optionalMoney: z.ZodType<number | undefined, z.ZodTypeDef, unknown> = z.preprocess(
+  (v) => (v === "" || v === null ? undefined : v),
+  z.coerce.number().finite("Enter a valid amount").optional()
+);
 
 export const MAINTENANCE_PRIORITIES = [
   { value: "low", label: "Low" },
@@ -82,10 +78,10 @@ export type VendorInput = z.infer<typeof vendorSchema>;
 
 export const workOrderCostSchema = z.object({
   work_order_id: z.string().uuid(),
-  actual_amount: z
-    .union([z.string(), z.number()])
-    .transform((v) => (typeof v === "number" ? v : Number(v)))
-    .refine((v) => Number.isFinite(v) && v >= 0, "Enter a valid amount"),
+  actual_amount: z.coerce
+    .number()
+    .finite("Enter a valid amount")
+    .refine((v) => v >= 0, "Enter a valid amount"),
   notes: optionalString,
 });
 export type WorkOrderCostInput = z.infer<typeof workOrderCostSchema>;

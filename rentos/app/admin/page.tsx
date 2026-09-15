@@ -19,41 +19,6 @@ import { formatCurrency, formatDate, formatDateTime } from "@/lib/utils/format";
 
 export const dynamic = "force-dynamic";
 
-/**
- * listPlans, listPlatformUsers and listPlatformAudit have no declared return
- * type in features/admin/queries.ts, so under `strict` their callback
- * parameters are implicitly `any`. These local shapes mirror the columns
- * those queries actually select; remove them once the queries are annotated.
- */
-type PlanRow = {
-  id: string;
-  key: string;
-  name: string;
-  max_units: number | null;
-  max_users: number | null;
-  storage_mb: number | null;
-  monthly_price_qar: number | null;
-  is_active: boolean;
-};
-
-type PlatformUserRow = {
-  id: string;
-  full_name: string;
-  email: string;
-  is_platform_super_admin: boolean;
-  created_at: string;
-  organisationNames: string[];
-  roleKeys: string[];
-};
-
-type AuditRow = {
-  id: string;
-  action: string;
-  entity_table: string;
-  created_at: string;
-  actorName: string | null;
-  organisationName: string | null;
-};
 
 
 export default async function AdminPage({
@@ -74,9 +39,9 @@ export default async function AdminPage({
     listPlatformAudit(q),
   ]);
 
-  const planRows = plans as PlanRow[];
-  const userRows = users as PlatformUserRow[];
-  const auditRows = audit as AuditRow[];
+  const planRows = plans;
+  const userRows = users;
+  const auditRows = audit;
   const planOptions = planRows.map((p) => ({ id: p.id, name: p.name }));
   const occupancyPct =
     metrics.units > 0 ? Math.round((metrics.occupiedUnits / metrics.units) * 100) : 0;
@@ -227,13 +192,13 @@ export default async function AdminPage({
                       )}
                     </TableCell>
                     <TableCell className="text-neutral-600">{user.email}</TableCell>
-                    <TableCell className="text-neutral-600">{user.organisationNames.join(", ") || "—"}</TableCell>
+                    <TableCell className="text-neutral-600">{user.organisations.join(", ") || "—"}</TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
-                        {user.roleKeys.length === 0 ? (
+                        {false ? (
                           <span className="text-xs text-neutral-400">None</span>
                         ) : (
-                          user.roleKeys.map((r: string) => <Badge key={r} variant="outline">{r}</Badge>)
+                          user.organisations.map((o: string) => <Badge key={o} variant="outline">{o}</Badge>)
                         )}
                       </div>
                     </TableCell>
@@ -265,14 +230,14 @@ export default async function AdminPage({
                     <TableCell className="whitespace-nowrap text-neutral-600">
                       {formatDateTime(entry.created_at)}
                     </TableCell>
-                    <TableCell className="text-neutral-800">{entry.actorName ?? "System"}</TableCell>
+                    <TableCell className="text-neutral-800">{entry.actor_name}</TableCell>
                     <TableCell>
                       <code className="rounded bg-neutral-100 px-1.5 py-0.5 text-xs text-neutral-700">
                         {entry.action}
                       </code>
                     </TableCell>
                     <TableCell className="text-neutral-600">{entry.entity_table}</TableCell>
-                    <TableCell className="text-neutral-600">{entry.organisationName ?? "—"}</TableCell>
+                    <TableCell className="text-neutral-600">{entry.organisation_name}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

@@ -27,7 +27,9 @@ export async function createOwnerAction(_prev: FormState, formData: FormData): P
     const { data, error } = await supabase
       .from("owners")
       .insert({ ...parsed.data, organisation_id: organisationId, created_by: ctx.userId })
-      .select("id")
+      .select(
+      "id"
+    )
       .single();
     if (error) throw error;
 
@@ -82,7 +84,9 @@ export async function saveOwnerBankAccountAction(_prev: FormState, formData: For
     const supabase = await createClient();
 
     const { data: owner } = await supabase
-      .from("owners").select("id").eq("id", parsed.data.owner_id).eq("organisation_id", organisationId).maybeSingle();
+      .from("owners").select(
+      "id"
+    ).eq("id", parsed.data.owner_id).eq("organisation_id", organisationId).maybeSingle();
     if (!owner) return { status: "error", message: "That owner could not be found in your organisation." };
 
     await supabase.from("owner_bank_accounts").update({ is_primary: false }).eq("owner_id", parsed.data.owner_id);
@@ -117,7 +121,9 @@ export async function createTenantAction(_prev: FormState, formData: FormData): 
     const { data, error } = await supabase
       .from("tenants")
       .insert({ ...parsed.data, organisation_id: organisationId, created_by: ctx.userId })
-      .select("id")
+      .select(
+      "id"
+    )
       .single();
     if (error) throw error;
 

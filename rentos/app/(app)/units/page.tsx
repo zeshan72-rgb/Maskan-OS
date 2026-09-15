@@ -31,9 +31,7 @@ export default async function UnitsPage({
   let query = supabase
     .from("units")
     .select(
-      "id, unit_number, floor, bedrooms, bathrooms, area_sqm, unit_type, furnishing, " +
-        "current_rent, market_rent, status, properties ( id, name ), " +
-        "leases ( id, status, tenants ( name ) )"
+      "id, unit_number, floor, bedrooms, bathrooms, area_sqm, unit_type, furnishing, current_rent, market_rent, status, properties ( id, name ), leases ( id, status, tenants ( name ) )"
     )
     .eq("organisation_id", membership.organisationId)
     .is("archived_at", null)

@@ -20,7 +20,9 @@ export default async function BuildingsPage() {
   // buildings has no organisation_id of its own; it hangs off properties.
   const { data } = await supabase
     .from("buildings")
-    .select("id, name, floors, created_at, properties!inner ( id, name, organisation_id ), units ( id, status )")
+    .select(
+      "id, name, floors, created_at, properties!inner ( id, name, organisation_id ), units ( id, status )"
+    )
     .eq("properties.organisation_id", membership.organisationId)
     .order("name");
 

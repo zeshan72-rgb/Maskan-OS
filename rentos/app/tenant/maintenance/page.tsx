@@ -36,7 +36,9 @@ export default async function TenantMaintenancePage() {
   const [maintenance, units, { data: categories }] = await Promise.all([
     getTenantMaintenance(tenantId),
     getTenantUnits(tenantId),
-    supabase.from("maintenance_categories").select("id, name").is("organisation_id", null).order("name"),
+    supabase.from("maintenance_categories").select(
+      "id, name"
+    ).is("organisation_id", null).order("name"),
   ]);
 
   const rows = maintenance as MaintRow[];

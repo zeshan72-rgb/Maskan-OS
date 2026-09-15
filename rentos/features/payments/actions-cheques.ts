@@ -30,7 +30,9 @@ export async function createChequeAction(_prev: FormState, formData: FormData): 
 
     const { data: lease } = await supabase
       .from("leases")
-      .select("id")
+      .select(
+      "id"
+    )
       .eq("id", input.lease_id)
       .eq("organisation_id", organisationId)
       .maybeSingle();
@@ -40,7 +42,9 @@ export async function createChequeAction(_prev: FormState, formData: FormData): 
     if (input.rent_instalment_id) {
       const { data: instalment } = await supabase
         .from("rent_instalments")
-        .select("id, lease_id")
+        .select(
+      "id, lease_id"
+    )
         .eq("id", input.rent_instalment_id)
         .maybeSingle();
       if (!instalment || instalment.lease_id !== input.lease_id) {
@@ -64,7 +68,9 @@ export async function createChequeAction(_prev: FormState, formData: FormData): 
         status: "received",
         created_by: ctx.userId,
       })
-      .select("id")
+      .select(
+      "id"
+    )
       .single();
     if (error) throw error;
 
@@ -101,7 +107,9 @@ export async function updateChequeStatusAction(
 
     const { data: cheque } = await supabase
       .from("cheques")
-      .select("id, status, cheque_number, amount, lease_id, rent_instalment_id")
+      .select(
+      "id, status, cheque_number, amount, lease_id, rent_instalment_id"
+    )
       .eq("id", chequeId)
       .eq("organisation_id", organisationId)
       .maybeSingle();
@@ -140,7 +148,9 @@ export async function updateChequeStatusAction(
     if (status === "bounced") {
       const { data: lease } = await supabase
         .from("leases")
-        .select("tenant_id, lease_code")
+        .select(
+      "tenant_id, lease_code"
+    )
         .eq("id", cheque.lease_id)
         .maybeSingle();
 
@@ -185,7 +195,9 @@ export async function replaceChequeAction(_prev: FormState, formData: FormData):
     const supabase = await createClient();
     const { data: original } = await supabase
       .from("cheques")
-      .select("id, status, lease_id, rent_instalment_id")
+      .select(
+      "id, status, lease_id, rent_instalment_id"
+    )
       .eq("id", originalId)
       .eq("organisation_id", organisationId)
       .maybeSingle();

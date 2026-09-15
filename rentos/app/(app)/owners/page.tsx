@@ -15,7 +15,9 @@ export default async function OwnersPage() {
 
   const { data: owners } = await supabase
     .from("owners")
-    .select("id, name, kind, qid_or_cr, email, phone, property_owners ( property_id )")
+    .select(
+      "id, name, kind, qid_or_cr, email, phone, property_owners ( property_id )"
+    )
     .eq("organisation_id", membership.organisationId)
     .is("archived_at", null)
     .order("name");
@@ -60,7 +62,7 @@ export default async function OwnersPage() {
                 <TableCell className="tabular-nums text-neutral-600">{owner.qid_or_cr ?? "—"}</TableCell>
                 <TableCell className="text-neutral-600">{owner.phone ?? owner.email ?? "—"}</TableCell>
                 <TableCell className="text-right tabular-nums text-neutral-800">
-                  {(owner.property_owners ?? []).length}
+                  {Array.isArray(owner.property_owners) ? owner.property_owners.length : owner.property_owners ? 1 : 0}
                 </TableCell>
               </TableRow>
             ))}

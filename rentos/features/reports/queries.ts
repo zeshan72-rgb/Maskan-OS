@@ -9,9 +9,15 @@ export async function getPortfolioReport(organisationId: string): Promise<Portfo
   const supabase = await createClient();
 
   const [{ data: properties }, { data: units }, { data: leases }] = await Promise.all([
-    supabase.from("properties").select("id, name, type").eq("organisation_id", organisationId).is("archived_at", null),
-    supabase.from("units").select("property_id, status").eq("organisation_id", organisationId).is("archived_at", null),
-    supabase.from("leases").select("property_id, monthly_rent").eq("organisation_id", organisationId).eq("status", "active"),
+    supabase.from("properties").select(
+      "id, name, type"
+    ).eq("organisation_id", organisationId).is("archived_at", null),
+    supabase.from("units").select(
+      "property_id, status"
+    ).eq("organisation_id", organisationId).is("archived_at", null),
+    supabase.from("leases").select(
+      "property_id, monthly_rent"
+    ).eq("organisation_id", organisationId).eq("status", "active"),
   ]);
 
   const unitsByProperty = new Map<string, { units: number; occupied: number; vacant: number }>();
@@ -67,7 +73,9 @@ export async function getCollectionReport(organisationId: string, months = 12): 
 
   const { data } = await supabase
     .from("rent_instalments")
-    .select("due_date, original_amount, outstanding_amount")
+    .select(
+      "due_date, original_amount, outstanding_amount"
+    )
     .eq("organisation_id", organisationId)
     .gte("due_date", start.toISOString().slice(0, 10));
 
@@ -112,7 +120,9 @@ export async function getLeaseExpiryReport(organisationId: string, withinDays = 
 
   const { data } = await supabase
     .from("leases")
-    .select("lease_code, end_date, monthly_rent, status, tenants ( name ), properties ( name ), units ( unit_number )")
+    .select(
+      "lease_code, end_date, monthly_rent, status, tenants ( name ), properties ( name ), units ( unit_number )"
+    )
     .eq("organisation_id", organisationId)
     .in("status", ["active", "expiring", "renewal_offered"])
     .lte("end_date", limit.toISOString().slice(0, 10))
@@ -147,7 +157,9 @@ export async function getChequeReport(organisationId: string): Promise<ChequeRep
   const supabase = await createClient();
   const { data } = await supabase
     .from("cheques")
-    .select("status, amount")
+    .select(
+      "status, amount"
+    )
     .eq("organisation_id", organisationId);
 
   const buckets = new Map<string, { count: number; amount: number }>();
@@ -177,7 +189,9 @@ export async function getVendorPerformanceReport(organisationId: string): Promis
 
   const { data } = await supabase
     .from("work_orders")
-    .select("vendor_id, status, actual_amount, vendors ( name )")
+    .select(
+      "vendor_id, status, actual_amount, vendors ( name )"
+    )
     .eq("organisation_id", organisationId)
     .not("vendor_id", "is", null);
 
@@ -222,7 +236,9 @@ export async function getMaintenanceReport(organisationId: string): Promise<Main
 
   const { data } = await supabase
     .from("maintenance_requests")
-    .select("status, created_at, updated_at, maintenance_categories ( name )")
+    .select(
+      "status, created_at, updated_at, maintenance_categories ( name )"
+    )
     .eq("organisation_id", organisationId);
 
   const buckets = new Map<string, { total: number; open: number; completed: number; ageSum: number }>();

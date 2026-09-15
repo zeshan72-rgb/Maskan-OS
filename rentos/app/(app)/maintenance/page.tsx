@@ -35,9 +35,7 @@ export default async function MaintenancePage({
   let query = supabase
     .from("maintenance_requests")
     .select(
-      "id, request_code, description, priority, status, created_at, " +
-        "properties ( id, name ), units ( unit_number ), tenants ( name ), " +
-        "maintenance_categories ( name ), work_orders ( id, vendors ( name ) )"
+      "id, request_code, description, priority, status, created_at, properties ( id, name ), units ( unit_number ), tenants ( name ), maintenance_categories ( name ), work_orders ( id, vendors ( name ) )"
     )
     .eq("organisation_id", membership.organisationId)
     .order("created_at", { ascending: false });

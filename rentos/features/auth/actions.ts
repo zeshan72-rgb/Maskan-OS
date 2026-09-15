@@ -106,7 +106,9 @@ export async function acceptInvitationAction(
 
   const { data: invitation, error: invError } = await admin
     .from("invitations")
-    .select("id, organisation_id, email, role_id, owner_id, tenant_id, vendor_id, status, expires_at")
+    .select(
+      "id, organisation_id, email, role_id, owner_id, tenant_id, vendor_id, status, expires_at"
+    )
     .eq("token", token)
     .maybeSingle();
 
@@ -134,7 +136,9 @@ export async function acceptInvitationAction(
       tenant_id: invitation.tenant_id,
       vendor_id: invitation.vendor_id,
     })
-    .select("id")
+    .select(
+      "id"
+    )
     .single();
 
   if (member) {

@@ -30,14 +30,22 @@ export async function getPlatformMetrics(): Promise<PlatformMetrics> {
   const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().slice(0, 10);
 
   const [orgs, profiles, properties, units, leases, instalments, maintenance] = await Promise.all([
-    admin.from("organisations").select("status"),
+    admin.from("organisations").select(
+      "status"
+    ),
     admin.from("profiles").select("id", { count: "exact", head: true }),
     admin.from("properties").select("id", { count: "exact", head: true }).is("archived_at", null),
-    admin.from("units").select("status").is("archived_at", null),
-    admin.from("leases").select("monthly_rent").eq("status", "active"),
+    admin.from("units").select(
+      "status"
+    ).is("archived_at", null),
+    admin.from("leases").select(
+      "monthly_rent"
+    ).eq("status", "active"),
     admin
       .from("rent_instalments")
-      .select("original_amount, outstanding_amount")
+      .select(
+      "original_amount, outstanding_amount"
+    )
       .gte("due_date", monthStart)
       .lte("due_date", monthEnd),
     admin.from("maintenance_requests").select("id", { count: "exact", head: true })
@@ -86,7 +94,9 @@ export async function listAdminOrganisations(q?: string): Promise<AdminOrganisat
 
   let query = admin
     .from("organisations")
-    .select("id, name, slug, status, email, created_at, onboarding_step");
+    .select(
+      "id, name, slug, status, email, created_at, onboarding_step"
+    );
 
   if (q) query = query.or(`name.ilike.%${q}%,slug.ilike.%${q}%,email.ilike.%${q}%`);
 
@@ -96,10 +106,18 @@ export async function listAdminOrganisations(q?: string): Promise<AdminOrganisat
   if (ids.length === 0) return [];
 
   const [subs, members, units, leases] = await Promise.all([
-    admin.from("organisation_subscriptions").select("organisation_id, plans ( name )").in("organisation_id", ids),
-    admin.from("organisation_members").select("organisation_id").in("organisation_id", ids),
-    admin.from("units").select("organisation_id").in("organisation_id", ids).is("archived_at", null),
-    admin.from("leases").select("organisation_id").in("organisation_id", ids).eq("status", "active"),
+    admin.from("organisation_subscriptions").select(
+      "organisation_id, plans ( name )"
+    ).in("organisation_id", ids),
+    admin.from("organisation_members").select(
+      "organisation_id"
+    ).in("organisation_id", ids),
+    admin.from("units").select(
+      "organisation_id"
+    ).in("organisation_id", ids).is("archived_at", null),
+    admin.from("leases").select(
+      "organisation_id"
+    ).in("organisation_id", ids).eq("status", "active"),
   ]);
 
   function tally(rows: { organisation_id: string }[] | null) {
@@ -141,25 +159,35 @@ export async function getAdminOrganisation(organisationId: string): Promise<Admi
 
   const { data: org } = await admin
     .from("organisations")
-    .select("id, name, slug, status, email, created_at, onboarding_step")
+    .select(
+      "id, name, slug, status, email, created_at, onboarding_step"
+    )
     .eq("id", organisationId)
     .maybeSingle();
   if (!org) return null;
 
   const [sub, members, properties, units, tenants, owners, leases, audit] = await Promise.all([
-    admin.from("organisation_subscriptions").select("plans ( name )").eq("organisation_id", organisationId).maybeSingle(),
+    admin.from("organisation_subscriptions").select(
+      "plans ( name )"
+    ).eq("organisation_id", organisationId).maybeSingle(),
     admin
       .from("organisation_members")
-      .select("id, profiles ( full_name, email ), member_roles ( roles ( name ) )")
+      .select(
+      "id, profiles ( full_name, email ), member_roles ( roles ( name ) )"
+    )
       .eq("organisation_id", organisationId),
     admin.from("properties").select("id", { count: "exact", head: true }).eq("organisation_id", organisationId).is("archived_at", null),
     admin.from("units").select("id", { count: "exact", head: true }).eq("organisation_id", organisationId).is("archived_at", null),
     admin.from("tenants").select("id", { count: "exact", head: true }).eq("organisation_id", organisationId).is("archived_at", null),
     admin.from("owners").select("id", { count: "exact", head: true }).eq("organisation_id", organisationId).is("archived_at", null),
-    admin.from("leases").select("monthly_rent").eq("organisation_id", organisationId).eq("status", "active"),
+    admin.from("leases").select(
+      "monthly_rent"
+    ).eq("organisation_id", organisationId).eq("status", "active"),
     admin
       .from("audit_logs")
-      .select("id, action, entity_table, created_at")
+      .select(
+      "id, action, entity_table, created_at"
+    )
       .eq("organisation_id", organisationId)
       .order("created_at", { ascending: false })
       .limit(20),
@@ -194,7 +222,9 @@ export async function listPlans() {
   const admin = createAdminClient();
   const { data } = await admin
     .from("plans")
-    .select("id, key, name, max_units, max_users, storage_mb, monthly_price_qar, features, is_active, sort_order")
+    .select(
+      "id, key, name, max_units, max_users, storage_mb, monthly_price_qar, features, is_active, sort_order"
+    )
     .order("sort_order");
   return data ?? [];
 }
@@ -204,7 +234,9 @@ export async function listPlatformUsers(q?: string) {
 
   let query = admin
     .from("profiles")
-    .select("id, full_name, email, is_platform_super_admin, created_at");
+    .select(
+      "id, full_name, email, is_platform_super_admin, created_at"
+    );
   if (q) query = query.or(`full_name.ilike.%${q}%,email.ilike.%${q}%`);
 
   const { data: profiles } = await query.order("created_at", { ascending: false }).limit(200);
@@ -213,7 +245,9 @@ export async function listPlatformUsers(q?: string) {
 
   const { data: memberships } = await admin
     .from("organisation_members")
-    .select("profile_id, organisations ( name )")
+    .select(
+      "profile_id, organisations ( name )"
+    )
     .in("profile_id", ids);
 
   const orgsByProfile = new Map<string, string[]>();
@@ -231,7 +265,9 @@ export async function listPlatformAudit(q?: string) {
 
   let query = admin
     .from("audit_logs")
-    .select("id, action, entity_table, entity_id, metadata, created_at, organisation_id, actor_id");
+    .select(
+      "id, action, entity_table, entity_id, metadata, created_at, organisation_id, actor_id"
+    );
   if (q) query = query.or(`action.ilike.%${q}%,entity_table.ilike.%${q}%`);
 
   const { data: logs } = await query.order("created_at", { ascending: false }).limit(200);
@@ -241,8 +277,12 @@ export async function listPlatformAudit(q?: string) {
   const actorIds = Array.from(new Set(rows.map((r) => r.actor_id).filter((id): id is string => !!id)));
 
   const [orgs, actors] = await Promise.all([
-    orgIds.length > 0 ? admin.from("organisations").select("id, name").in("id", orgIds) : Promise.resolve({ data: [] }),
-    actorIds.length > 0 ? admin.from("profiles").select("id, full_name").in("id", actorIds) : Promise.resolve({ data: [] }),
+    orgIds.length > 0 ? admin.from("organisations").select(
+      "id, name"
+    ).in("id", orgIds) : Promise.resolve({ data: [] }),
+    actorIds.length > 0 ? admin.from("profiles").select(
+      "id, full_name"
+    ).in("id", actorIds) : Promise.resolve({ data: [] }),
   ]);
 
   const orgNames = new Map((orgs.data ?? []).map((o) => [o.id, o.name]));

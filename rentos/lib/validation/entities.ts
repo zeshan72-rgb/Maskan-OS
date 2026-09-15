@@ -6,14 +6,10 @@ const optionalString = z
   .optional()
   .transform((v) => (v === "" ? undefined : v));
 
-const optionalNumber = z
-  .union([z.string(), z.number()])
-  .optional()
-  .transform((v) => {
-    if (v === undefined || v === "" || v === null) return undefined;
-    const n = typeof v === "number" ? v : Number(v);
-    return Number.isFinite(n) ? n : undefined;
-  });
+const optionalNumber: z.ZodType<number | undefined, z.ZodTypeDef, unknown> = z.preprocess(
+  (v) => (v === "" || v === null ? undefined : v),
+  z.coerce.number().finite("Enter a valid amount").optional()
+);
 
 export const PROPERTY_TYPES = [
   { value: "residential", label: "Residential" },

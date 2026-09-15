@@ -61,7 +61,9 @@ export async function listMaintenanceRequests(params: {
   if (ids.length > 0) {
     const { data: workOrders } = await supabase
       .from("work_orders")
-      .select("maintenance_request_id, vendors ( name )")
+      .select(
+      "maintenance_request_id, vendors ( name )"
+    )
       .in("maintenance_request_id", ids);
 
     for (const wo of workOrders ?? []) {
@@ -150,17 +152,23 @@ export async function getMaintenanceRequest(
   const [{ data: comments }, { data: attachments }, { data: workOrders }] = await Promise.all([
     supabase
       .from("maintenance_comments")
-      .select("id, body, is_internal, created_at, author_id")
+      .select(
+      "id, body, is_internal, created_at, author_id"
+    )
       .eq("maintenance_request_id", requestId)
       .order("created_at"),
     supabase
       .from("maintenance_attachments")
-      .select("id, storage_path, stage, created_at")
+      .select(
+      "id, storage_path, stage, created_at"
+    )
       .eq("maintenance_request_id", requestId)
       .order("created_at"),
     supabase
       .from("work_orders")
-      .select("id, vendor_id, scheduled_at, estimated_cost, approved_amount, actual_amount, instructions, status, vendors ( name )")
+      .select(
+      "id, vendor_id, scheduled_at, estimated_cost, approved_amount, actual_amount, instructions, status, vendors ( name )"
+    )
       .eq("maintenance_request_id", requestId)
       .order("created_at", { ascending: false })
       .limit(1),
@@ -170,7 +178,9 @@ export async function getMaintenanceRequest(
   const authorIds = Array.from(new Set((comments ?? []).map((c) => c.author_id).filter((id): id is string => !!id)));
   const authorNames = new Map<string, string>();
   if (authorIds.length > 0) {
-    const { data: profiles } = await supabase.from("profiles").select("id, full_name").in("id", authorIds);
+    const { data: profiles } = await supabase.from("profiles").select(
+      "id, full_name"
+    ).in("id", authorIds);
     for (const p of profiles ?? []) authorNames.set(p.id, p.full_name);
   }
 
@@ -179,7 +189,9 @@ export async function getMaintenanceRequest(
   if (workOrder) {
     const { data: events } = await supabase
       .from("work_order_events")
-      .select("id, event_type, notes, created_at")
+      .select(
+      "id, event_type, notes, created_at"
+    )
       .eq("work_order_id", workOrder.id)
       .order("created_at");
     workOrderEvents = events ?? [];
@@ -238,7 +250,9 @@ export async function getMaintenanceCategories(organisationId: string) {
   const supabase = await createClient();
   const { data } = await supabase
     .from("maintenance_categories")
-    .select("id, name, organisation_id")
+    .select(
+      "id, name, organisation_id"
+    )
     .or(`organisation_id.is.null,organisation_id.eq.${organisationId}`)
     .eq("is_active", true)
     .order("name");
@@ -249,7 +263,9 @@ export async function getVendorOptions(organisationId: string) {
   const supabase = await createClient();
   const { data } = await supabase
     .from("vendors")
-    .select("id, name, trade")
+    .select(
+      "id, name, trade"
+    )
     .eq("organisation_id", organisationId)
     .is("archived_at", null)
     .order("name");

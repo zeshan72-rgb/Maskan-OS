@@ -37,11 +37,15 @@ export default async function FinancePage() {
       listOwnerStatements(membership.organisationId),
       supabase
         .from("property_expenses")
-        .select("id, description, amount, expense_date, approval_status, properties ( id, name ), vendors ( name ), expense_categories ( name )")
+        .select(
+      "id, description, amount, expense_date, approval_status, properties ( id, name ), vendors ( name ), expense_categories ( name )"
+    )
         .eq("organisation_id", membership.organisationId)
         .order("expense_date", { ascending: false })
         .limit(100),
-      supabase.from("expense_categories").select("id, name").is("organisation_id", null).order("name"),
+      supabase.from("expense_categories").select(
+      "id, name"
+    ).is("organisation_id", null).order("name"),
       getPropertyOptions(membership.organisationId),
       getOwnerOptions(membership.organisationId),
       getVendorOptions(membership.organisationId),

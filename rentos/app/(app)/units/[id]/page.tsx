@@ -28,9 +28,7 @@ export default async function UnitDetailPage({ params }: { params: Promise<{ id:
   const { data: unit } = await supabase
     .from("units")
     .select(
-      "id, unit_number, floor, bedrooms, bathrooms, area_sqm, unit_type, furnishing, " +
-        "current_rent, market_rent, status, internal_code, property_id, " +
-        "properties ( id, name, address )"
+      "id, unit_number, floor, bedrooms, bathrooms, area_sqm, unit_type, furnishing, current_rent, market_rent, status, internal_code, property_id, properties ( id, name, address )"
     )
     .eq("id", id)
     .eq("organisation_id", membership.organisationId)
@@ -41,12 +39,16 @@ export default async function UnitDetailPage({ params }: { params: Promise<{ id:
   const [{ data: leases }, { data: maintenance }] = await Promise.all([
     supabase
       .from("leases")
-      .select("id, lease_code, start_date, end_date, monthly_rent, status, tenants ( id, name )")
+      .select(
+      "id, lease_code, start_date, end_date, monthly_rent, status, tenants ( id, name )"
+    )
       .eq("unit_id", id)
       .order("start_date", { ascending: false }),
     supabase
       .from("maintenance_requests")
-      .select("id, request_code, description, priority, status, created_at")
+      .select(
+      "id, request_code, description, priority, status, created_at"
+    )
       .eq("unit_id", id)
       .order("created_at", { ascending: false })
       .limit(10),

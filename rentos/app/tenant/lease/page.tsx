@@ -45,10 +45,14 @@ export default async function TenantLeasePage() {
   const supabase = await createClient();
   const [{ data: leases }, renewal, { data: occupants }] = await Promise.all([
     supabase.from("leases")
-      .select("id, lease_code, start_date, end_date, monthly_rent, total_contract_rent, security_deposit, payment_frequency, payment_method, status, grace_period_days, notes, units ( unit_number, bedrooms, bathrooms, area_sqm, furnishing ), properties ( name, address )")
+      .select(
+      "id, lease_code, start_date, end_date, monthly_rent, total_contract_rent, security_deposit, payment_frequency, payment_method, status, grace_period_days, notes, units ( unit_number, bedrooms, bathrooms, area_sqm, furnishing ), properties ( name, address )"
+    )
       .eq("tenant_id", tenantId).order("start_date", { ascending: false }),
     getTenantRenewalOffer(tenantId),
-    supabase.from("occupants").select("id, name, relationship").eq("tenant_id", tenantId),
+    supabase.from("occupants").select(
+      "id, name, relationship"
+    ).eq("tenant_id", tenantId),
   ]);
 
   const all = (leases ?? []) as LeaseRow[];
