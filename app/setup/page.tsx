@@ -1,6 +1,7 @@
 import { CheckCircle2, Circle, Database, KeyRound, Rocket } from "lucide-react";
 import { getEnvStatus } from "@/lib/config/env";
 import { APP_CONFIG } from "@/lib/config/app";
+import { MaskanLogo } from "@/components/brand/logo";
 import { cn } from "@/lib/utils/cn";
 
 export const dynamic = "force-dynamic";
@@ -44,14 +45,9 @@ export default function SetupPage() {
   return (
     <div className="min-h-screen bg-neutral-50 px-4 py-12">
       <div className="mx-auto max-w-2xl">
-        <div className="mb-8 flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-neutral-900 text-sm font-bold text-white">
-            R
-          </div>
-          <div>
-            <p className="text-sm font-semibold text-neutral-900">{APP_CONFIG.name}</p>
-            <p className="text-xs text-neutral-500">Finish setup</p>
-          </div>
+        <div className="mb-8 flex items-center gap-3">
+          <MaskanLogo className="h-[30px] w-auto text-neutral-900" />
+          <p className="text-xs text-neutral-500">Finish setup</p>
         </div>
 
         <div className="animate-[slide-up_0.32s_cubic-bezier(0.22,1,0.36,1)_both] rounded-xl border border-neutral-200 bg-white p-6 shadow-sm">
